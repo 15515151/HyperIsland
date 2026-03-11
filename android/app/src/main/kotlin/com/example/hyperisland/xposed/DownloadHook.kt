@@ -50,16 +50,119 @@ class DownloadHook : IXposedHookLoadPackage {
         XposedBridge.log("========================================")
 
         try {
+            // 方案1: Hook Notification.Builder.build() - 从源头拦截
+            hookNotificationBuilder(lpparam)
+
+            // 方案2: 保留原有的 notify() Hook 作为兜底
             val nmClass = lpparam.classLoader.loadClass("android.app.NotificationManager")
-
-            // Hook notify(String tag, int id, Notification n) - 三参数版本
             hookNotifyMethod(nmClass, lpparam, hasTag = true)
-
-            // Hook notify(int id, Notification n) - 两参数版本
             hookNotifyMethod(nmClass, lpparam, hasTag = false)
 
         } catch (e: Throwable) {
             XposedBridge.log("HyperIsland: Error hooking: ${e.message}")
+        }
+    }
+
+    /**
+     * Hook Notification.Builder.build() 方法
+     * 在通知构建时就注入灵动岛参数，避免原始通知闪现
+     */
+    private fun hookNotificationBuilder(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            // Android不同版本的Builder类路径可能不同
+            val builderClasses = listOf(
+                "android.app.Notification\$Builder",
+                "android.app.Notification.Builder"
+            )
+
+            for (builderClassName in builderClasses) {
+                try {
+                    val builderClass = lpparam.classLoader.loadClass(builderClassName)
+
+                    XposedHelpers.findAndHookMethod(
+                        builderClass,
+                        "build",
+                        object : XC_MethodHook() {
+                            override fun afterHookedMethod(param: MethodHookParam) {
+                                val notif = param.result as? Notification ?: return@afterHookedMethod
+
+                                // 尝试从Builder中获取更多信息
+                                val builder = param.thisObject
+
+                                // 提取通知信息
+                                try {
+                                    val extras = extrasField?.get(notif) as? Bundle ?: return@afterHookedMethod
+
+                                    val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
+                                    val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
+
+                                    // 检查是否是下载相关的通知
+                                    val isDownload = isDownloadNotification(title, text, extras)
+                                    if (!isDownload) return@afterHookedMethod
+
+                                    // 从包名提取应用名
+                                    val appName = lpparam.packageName.substringAfterLast(".").replaceFirstChar { it.uppercase() }
+                                    val fileName = extractFileName(title, text, extras)
+
+                                    // 创建唯一标识（使用时间戳和对象hashCode确保唯一性）
+                                    val key = "${lpparam.packageName}_${System.currentTimeMillis()}_${notif.hashCode()}"
+                                    val currentTime = System.currentTimeMillis()
+
+                                    // 解析进度
+                                    val progress = extractProgress(title, text, extras)
+
+                                    // 获取或创建通知信息
+                                    val info = processedNotifications.getOrPut(key) {
+                                        NotificationInfo(progress, currentTime, appName)
+                                    }
+
+                                    // 防抖：进度相同时，1秒内不重复处理
+                                    if (info.lastProgress == progress && currentTime - info.lastProcessTime < 1000) {
+                                        return@afterHookedMethod
+                                    }
+
+                                    // 更新记录
+                                    info.lastProgress = progress
+                                    info.lastProcessTime = currentTime
+                                    info.appName = appName
+
+                                    // 清理旧记录
+                                    processedNotifications.entries.removeIf { currentTime - it.value.lastProcessTime > 10000 }
+
+                                    XposedBridge.log("")
+                                    XposedBridge.log("╔════════════════════════════════════════╗")
+                                    XposedBridge.log("║   🎯 BUILDER HOOK - DOWNLOAD FOUND!    ║")
+                                    XposedBridge.log("╠════════════════════════════════════════╣")
+                                    XposedBridge.log("║ Package: $appName")
+                                    XposedBridge.log("║ File:    $fileName")
+                                    XposedBridge.log("║ Title:   $title")
+                                    XposedBridge.log("║ Text:    $text")
+                                    XposedBridge.log("║ Progress: $progress%")
+                                    XposedBridge.log("╚════════════════════════════════════════╝")
+                                    XposedBridge.log("")
+
+                                    // 注入灵动岛参数
+                                    IslandInjector.inject(notif, lpparam, title, text, extras, progress, appName, fileName)
+
+                                    // 标记为已处理，防止notify()重复处理
+                                    extras.putBoolean("hyperisland_processed", true)
+
+                                } catch (e: Throwable) {
+                                    // 静默失败，避免影响正常通知流程
+                                }
+                            }
+                        }
+                    )
+
+                    XposedBridge.log("HyperIsland: ✅ Hooked Notification.Builder.build() from $builderClassName")
+                    break // 成功Hook后退出循环
+                } catch (e: Throwable) {
+                    // 继续尝试下一个类名
+                    continue
+                }
+            }
+        } catch (e: Throwable) {
+            XposedBridge.log("HyperIsland: Builder hook error: ${e.message}")
         }
     }
 
@@ -96,6 +199,12 @@ class DownloadHook : IXposedHookLoadPackage {
 
         try {
             val extras = extrasField?.get(notif) as? Bundle ?: return
+
+            // 检查是否已经被 Builder.build() Hook 处理过
+            if (extras.getBoolean("hyperisland_processed", false)) {
+                XposedBridge.log("HyperIsland: ⏭️  Notification already processed by Builder hook, skipping")
+                return
+            }
 
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
             val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
@@ -149,6 +258,9 @@ class DownloadHook : IXposedHookLoadPackage {
 
             // 注入灵动岛参数（使用fileName代替appName显示）
             IslandInjector.inject(notif, lpparam, title, text, extras, progress, appName, fileName)
+
+            // 标记为已处理
+            extras.putBoolean("hyperisland_processed", true)
 
         } catch (e: Throwable) {
             XposedBridge.log("HyperIsland: Error handling notification: ${e.message}")
