@@ -30,15 +30,11 @@ object DownloadIslandNotification {
             val isMultiFile = Regex("""\d+个文件""").containsMatchIn(title + text + fileName)
 
             val displayTitle = when {
-                isComplete -> title
-                isPaused   -> if (isMultiFile) "$fileName 已暂停" else "已暂停 $progress%"
-                else       -> "$fileName 下载中 $progress%"
-            }
-            val displayContent = when {
                 isComplete -> "下载完成"
                 isPaused   -> "已暂停"
-                else       -> text.ifEmpty { fileName }
+                else       -> "下载中 $progress%"
             }
+            val displayContent = fileName.ifEmpty { text }
             val islandStateTitle = when {
                 isComplete -> "下载完成"
                 isPaused   -> "已暂停"
