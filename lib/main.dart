@@ -154,49 +154,44 @@ class _HyperIslandTestPageState extends State<HyperIslandTestPage> {
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: _startProgressDemo,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('开始进度演示'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
+              child: const Text('开始进度演示'),
             ),
             const SizedBox(height: 8),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () => _sendTestNotification('indeterminate'),
-              icon: const Icon(Icons.hourglass_empty),
-              label: const Text('显示不确定进度'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
+              child: const Text('显示不确定进度'),
             ),
             const SizedBox(height: 8),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () => _sendTestNotification('complete'),
-              icon: const Icon(Icons.check_circle),
-              label: const Text('显示下载完成'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
+              child: const Text('显示下载完成'),
             ),
             const SizedBox(height: 8),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () => _sendTestNotification('failed'),
-              icon: const Icon(Icons.error),
-              label: const Text('显示下载失败'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
+              child: const Text('显示下载失败'),
             ),
             const SizedBox(height: 8),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () => _sendTestNotification('custom'),
-              icon: const Icon(Icons.notifications),
-              label: const Text('发送自定义通知'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
               ),
+              child: const Text('发送自定义通知'),
             ),
             const SizedBox(height: 24),
             const Card(
