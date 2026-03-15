@@ -1,13 +1,3 @@
-import java.util.Properties
-import java.io.FileInputStream
-
-// 读取 android/key.properties（本地开发或 CI 中写入）
-val keystorePropertiesFile = rootProject.file("key.properties")
-val keystoreProperties = Properties()
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-}
-
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -25,17 +15,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    signingConfigs {
-        create("release") {
-            if (keystorePropertiesFile.exists()) {
-                keyAlias     = keystoreProperties["keyAlias"]     as String
-                keyPassword  = keystoreProperties["keyPassword"]  as String
-                storeFile    = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
-            }
-        }
-    }
-
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.hyperisland"
@@ -49,12 +28,7 @@ android {
 
     buildTypes {
         release {
-            // 有 key.properties 时使用正式签名，否则回退到 debug 签名
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
