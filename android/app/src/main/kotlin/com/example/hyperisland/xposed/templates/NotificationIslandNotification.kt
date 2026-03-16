@@ -71,10 +71,10 @@ object NotificationIslandNotification : IslandTemplate {
             }.toRounded(context)
             // 焦点图标（iconTextInfo）
             val focusDisplayIcon = when (focusIconMode) {
-                "notif_small" -> notifIcon ?: fallbackIcon
-                "notif_large" -> largeIcon ?: notifIcon ?: fallbackIcon
+                "notif_small" -> notifIcon ?: appIconRaw ?: fallbackIcon
+                "notif_large" -> largeIcon ?: appIconRaw ?: notifIcon ?: fallbackIcon
                 "app_icon"    -> appIconRaw ?: fallbackIcon
-                else          -> notifIcon ?: largeIcon ?: fallbackIcon  // auto
+                else          -> largeIcon ?: appIconRaw ?: notifIcon ?: fallbackIcon  // auto
             }.toRounded(context)
 
             val leftText       = title

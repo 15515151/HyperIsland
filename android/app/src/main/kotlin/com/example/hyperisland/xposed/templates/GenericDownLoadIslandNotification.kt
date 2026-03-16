@@ -156,10 +156,10 @@ object GenericProgressIslandNotification : IslandTemplate {
             }.toRounded(context)
             // 焦点图标（iconTextInfo）
             val focusDisplayIcon = when (focusIconMode) {
-                "notif_small" -> notifIcon ?: fallbackIcon
-                "notif_large" -> largeIcon ?: notifIcon ?: fallbackIcon
+                "notif_small" -> notifIcon ?: appIconRaw ?: fallbackIcon
+                "notif_large" -> largeIcon ?: appIconRaw ?: notifIcon ?: fallbackIcon
                 "app_icon"    -> appIconRaw ?: fallbackIcon
-                else          -> notifIcon ?: largeIcon ?: fallbackIcon  // auto
+                else          -> largeIcon ?: appIconRaw ?: notifIcon ?: fallbackIcon  // auto
             }.toRounded(context)
 
             val resolvedFirstFloat  = when (firstFloat)      { "on" -> true; "off" -> false; else -> false }
@@ -210,18 +210,18 @@ object GenericProgressIslandNotification : IslandTemplate {
                         }
                     }
                     smallIslandArea {
-//                        combinePicInfo
-//                        {
+                        combinePicInfo
+                        {
                             picInfo {
                                 type = 1
                                 pic  = islandIconKey
                             }
-//                            if (!isComplete && !isPaused && !isWaiting) {
-//                                progressInfo {
-//                                    this.progress = progress
-//                                }
-//                            }
-//                        }
+                            if (!isComplete && progress > 0) {
+                                progressInfo {
+                                    this.progress = progress
+                                }
+                            }
+                        }
                     }
                 }
 
