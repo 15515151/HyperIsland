@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/section_label.dart';
 
@@ -15,6 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final HomeController _ctrl;
   bool _restarting = false;
+  String _version = '';
 
   @override
   void initState() {
@@ -22,6 +24,9 @@ class _HomePageState extends State<HomePage> {
     _ctrl = HomeController();
     _ctrl.addListener(() {
       if (mounted) setState(() {});
+    });
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _version = 'v${info.version}');
     });
   }
 
@@ -108,7 +113,20 @@ class _HomePageState extends State<HomePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar.large(
-            title: const Text('HyperIsland'),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('HyperIsland'),
+                if (_version.isNotEmpty)
+                  Text(
+                    _version,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+              ],
+            ),
             backgroundColor: cs.surface,
             centerTitle: false,
             actions: [
