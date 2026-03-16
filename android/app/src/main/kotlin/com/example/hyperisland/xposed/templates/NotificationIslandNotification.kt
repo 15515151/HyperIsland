@@ -34,6 +34,7 @@ object NotificationIslandNotification : IslandTemplate {
         notifIcon       = data.notifIcon,
         largeIcon       = data.largeIcon,
         appIconRaw      = data.appIconRaw,
+        iconMode        = data.iconMode,
         focusNotif      = data.focusNotif,
         firstFloat      = data.firstFloat,
         enableFloatMode = data.enableFloatMode,
@@ -50,6 +51,7 @@ object NotificationIslandNotification : IslandTemplate {
         notifIcon: Icon?,
         largeIcon: Icon?,
         appIconRaw: Icon?,
+        iconMode: Icon?,
         focusNotif: String,
         firstFloat: String,
         enableFloatMode: String,
@@ -57,9 +59,12 @@ object NotificationIslandNotification : IslandTemplate {
         isOngoing: Boolean,
     ) {
         try {
-            val displayIcon = (largeIcon ?: notifIcon ?: appIconRaw
-                ?: Icon.createWithResource(context, android.R.drawable.ic_dialog_info))
-                .toRounded(context)
+            val displayIcon  = when (iconMode) {
+                "notif_small" -> notifIcon ?: fallbackIcon
+                "notif_large" -> largeIcon ?: notifIcon ?: fallbackIcon
+                "app_icon"    -> appIconRaw ?: fallbackIcon
+                else          -> notifIcon ?: largeIcon ?: fallbackIcon  // auto
+            }.toRounded(context)
 
             val leftText       = title
             val rightContent   = subtitle.ifEmpty { title }
