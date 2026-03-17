@@ -3,12 +3,21 @@ package com.example.hyperisland.xposed.templates
 import android.app.Notification
 import android.content.Context
 import android.graphics.drawable.Icon
+import android.os.Build
 import android.os.Bundle
 import com.example.hyperisland.xposed.IslandTemplate
 import com.example.hyperisland.xposed.NotifData
 import com.example.hyperisland.xposed.toRounded
-import com.xzakota.hyper.notification.focus.FocusNotification
 import de.robv.android.xposed.XposedBridge
+import io.github.d4viddf.hyperisland_kit.HyperAction
+import io.github.d4viddf.hyperisland_kit.HyperIslandNotification
+import io.github.d4viddf.hyperisland_kit.HyperPicture
+import io.github.d4viddf.hyperisland_kit.models.CircularProgressInfo
+import io.github.d4viddf.hyperisland_kit.models.ImageTextInfoLeft
+import io.github.d4viddf.hyperisland_kit.models.ImageTextInfoRight
+import io.github.d4viddf.hyperisland_kit.models.PicInfo
+import io.github.d4viddf.hyperisland_kit.models.ProgressTextInfo
+import io.github.d4viddf.hyperisland_kit.models.TextInfo
 
 /**
  * 通用进度条灵动岛通知构建器。
@@ -38,7 +47,7 @@ object GenericProgressIslandNotification : IslandTemplate {
         focusNotif      = data.focusNotif,
         firstFloat      = data.firstFloat,
         enableFloatMode = data.enableFloatMode,
-        timeoutSecs   = data.islandTimeout,
+        timeoutSecs     = data.islandTimeout,
     )
 
     /**
@@ -148,7 +157,7 @@ object GenericProgressIslandNotification : IslandTemplate {
             }
             val fallbackIcon = Icon.createWithResource(context, iconRes).apply { setTint(tintColor) }
             // 超级岛区域图标（bigIslandArea / smallIslandArea）
-            val displayIcon  = when (iconMode) {
+            val displayIcon = when (iconMode) {
                 "notif_small" -> notifIcon ?: fallbackIcon
                 "notif_large" -> largeIcon ?: notifIcon ?: fallbackIcon
                 "app_icon"    -> appIconRaw ?: fallbackIcon
@@ -162,100 +171,85 @@ object GenericProgressIslandNotification : IslandTemplate {
                 else          -> largeIcon ?: appIconRaw ?: notifIcon ?: fallbackIcon  // auto
             }.toRounded(context)
 
-            val resolvedFirstFloat  = when (firstFloat)      { "on" -> true; "off" -> false; else -> false }
-            val resolvedEnableFloat = when (enableFloatMode)  { "on" -> true; "off" -> false; else -> false }
-            val focusNotificaiton          = focusNotif != "off"
+            val resolvedFirstFloat  = firstFloat      == "on"
+            val resolvedEnableFloat = enableFloatMode == "on"
+            val showNotification    = focusNotif != "off"
 
-            val islandExtras = FocusNotification.buildV3 {
-                val islandIconKey = createPicture("key_generic_progress_icon", displayIcon)
-                val focusIconKey  = createPicture("key_generic_focus_icon", focusDisplayIcon)
+            val builder = HyperIslandNotification.Builder(context, "generic_progress", title)
 
-                islandFirstFloat   = resolvedFirstFloat
-                enableFloat        = resolvedEnableFloat
-                updatable          = !isComplete && !isPaused
-                isShowNotification = focusNotificaiton
-                ticker = title
-                island{
-                    islandProperty = 1
-                    islandTimeout  = timeoutSecs
-                    bigIslandArea {
-                        imageTextInfoLeft {
-                            type = 1
-                            picInfo {
-                                type = 1
-                                pic = islandIconKey
-                            }
-                            textInfo {
-                                this.title = stateLabel
-                            }
-                        }
-                        if (!isComplete && progress > 0) {
-                            progressTextInfo {
-                                textInfo {
-                                    this.title = rightContent
-                                    narrowFont = true
-                                }
-                                progressInfo {
-                                    this.progress = progress
-                                }
-                            }
-                        } else {
-                            imageTextInfoRight {
-                                type = 2
-                                textInfo {
-                                    this.title = rightContent
-                                    narrowFont = true
-                                }
-                            }
-                        }
-                    }
-                    smallIslandArea {
-                        combinePicInfo
-                        {
-                            picInfo {
-                                type = 1
-                                pic  = islandIconKey
-                            }
-                            if (!isComplete && progress > 0) {
-                                progressInfo {
-                                    this.progress = progress
-                                }
-                            }
-                        }
-                    }
-                }
+            builder.addPicture(HyperPicture("key_generic_progress_icon", displayIcon))
+            builder.addPicture(HyperPicture("key_generic_focus_icon", focusDisplayIcon))
 
+            builder.setIconTextInfo(
+                picKey  = "key_generic_focus_icon",
+                title   = title,
+                content = displayContent,
+            )
 
-                iconTextInfo {
-                    this.title = title
-                    content    = displayContent
-                    animIconInfo {
-                        type = 0
-                        src  = focusIconKey
-                    }
-                }
+            builder.setIslandFirstFloat(resolvedFirstFloat)
+            builder.setEnableFloat(resolvedEnableFloat)
+            builder.setShowNotification(showNotification)
+            builder.setIslandConfig(timeout = timeoutSecs)
 
-                val effectiveActions = actions.take(2)
-                if (effectiveActions.isNotEmpty() && focusNotificaiton) {
-                    textButton {
-                        effectiveActions.forEachIndexed { index, action ->
-                            addActionInfo {
-                                val btnIcon = action.getIcon()
-                                    ?: Icon.createWithResource(context, android.R.drawable.ic_menu_send)
-                                val wrappedAction = Notification.Action.Builder(
-                                    btnIcon,
-                                    action.title ?: "",
-                                    action.actionIntent,
-                                ).build()
-                                this.action = createAction("action_generic_$index", wrappedAction)
-                                actionTitle  = action.title?.toString() ?: ""
-                            }
-                        }
-                    }
-                }
+            // 小岛：下载中时带环形进度，其他状态仅图标
+            if (!isComplete && progress > 0) {
+                builder.setSmallIslandCircularProgress("key_generic_progress_icon", progress)
+            } else {
+                builder.setSmallIsland("key_generic_progress_icon")
             }
 
-            extras.putAll(islandExtras)
+            // 大岛：下载中时左侧状态+右侧环形进度，其他状态左侧状态+右侧文本
+            if (!isComplete && progress > 0) {
+                builder.setBigIslandInfo(
+                    left = ImageTextInfoLeft(
+                        type     = 1,
+                        picInfo  = PicInfo(type = 1, pic = "key_generic_progress_icon"),
+                        textInfo = TextInfo(title = stateLabel),
+                    ),
+                    progressText = ProgressTextInfo(
+                        progressInfo = CircularProgressInfo(progress = progress),
+                        textInfo     = TextInfo(title = rightContent, narrowFont = true),
+                    ),
+                )
+            } else {
+                builder.setBigIslandInfo(
+                    left = ImageTextInfoLeft(
+                        type     = 1,
+                        picInfo  = PicInfo(type = 1, pic = "key_generic_progress_icon"),
+                        textInfo = TextInfo(title = stateLabel),
+                    ),
+                    right = ImageTextInfoRight(
+                        type     = 2,
+                        textInfo = TextInfo(title = rightContent, narrowFont = true),
+                    ),
+                )
+            }
+
+            // 来自原通知的按钮（最多 2 个）
+            val effectiveActions = actions.take(2)
+            if (effectiveActions.isNotEmpty() && showNotification) {
+                val hyperActions = effectiveActions.mapIndexed { index, action ->
+                    // 文本模式（无图标），避免 TextButtonInfo.actionIcon 指向不存在的 pic 键
+                    HyperAction(
+                        key              = "action_generic_$index",
+                        title            = action.title ?: "",
+                        pendingIntent    = action.actionIntent,
+                        actionIntentType = 2,
+                    )
+                }
+                hyperActions.forEach { builder.addHiddenAction(it) }
+                builder.setTextButtons(*hyperActions.toTypedArray())
+            }
+
+            val resourceBundle = builder.buildResourceBundle()
+            extras.putAll(resourceBundle)
+            // HyperOS 从 extras 顶层查找 action，将嵌套 bundle 展开
+            flattenActionsToExtras(resourceBundle, extras)
+            // 修正字段名 + 保持 updatable 与原始逻辑一致
+            val jsonParam = injectUpdatable(
+                fixTextButtonJson(builder.buildJsonParam()), !isComplete && !isPaused
+            )
+            extras.putString("miui.focus.param", jsonParam)
 
             val stateTag = when {
                 isComplete -> "done"
@@ -267,6 +261,48 @@ object GenericProgressIslandNotification : IslandTemplate {
 
         } catch (e: Exception) {
             XposedBridge.log("HyperIsland[Generic]: Island injection error: ${e.message}")
+        }
+    }
+
+    /**
+     * 将 textButton 数组里新库输出的 "actionIntent"+"actionIntentType"
+     * 替换为 HyperOS V3 协议所需的 "action" 字段，否则按钮点击无响应。
+     */
+    private fun fixTextButtonJson(jsonParam: String): String {
+        return try {
+            val json = org.json.JSONObject(jsonParam)
+            val pv2  = json.optJSONObject("param_v2") ?: return jsonParam
+            val btns = pv2.optJSONArray("textButton") ?: return jsonParam
+            for (i in 0 until btns.length()) {
+                val btn = btns.getJSONObject(i)
+                val key = btn.optString("actionIntent").takeIf { it.isNotEmpty() } ?: continue
+                btn.put("action", key)
+                btn.remove("actionIntent")
+                btn.remove("actionIntentType")
+            }
+            json.toString()
+        } catch (_: Exception) { jsonParam }
+    }
+
+    private fun injectUpdatable(jsonParam: String, updatable: Boolean): String {
+        return try {
+            val json = org.json.JSONObject(jsonParam)
+            val pv2  = json.optJSONObject("param_v2") ?: org.json.JSONObject()
+            pv2.put("updatable", updatable)
+            json.put("param_v2", pv2)
+            json.toString()
+        } catch (_: Exception) { jsonParam }
+    }
+
+    /** 将 buildResourceBundle() 里嵌套的 "miui.focus.actions" 展开到 extras 顶层 */
+    private fun flattenActionsToExtras(resourceBundle: Bundle, extras: Bundle) {
+        val nested = resourceBundle.getBundle("miui.focus.actions") ?: return
+        for (key in nested.keySet()) {
+            val action: Notification.Action? = if (Build.VERSION.SDK_INT >= 33)
+                nested.getParcelable(key, Notification.Action::class.java)
+            else
+                @Suppress("DEPRECATION") nested.getParcelable(key)
+            if (action != null) extras.putParcelable(key, action)
         }
     }
 }

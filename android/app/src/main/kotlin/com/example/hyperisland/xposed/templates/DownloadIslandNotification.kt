@@ -2,6 +2,7 @@ package com.example.hyperisland.xposed.templates
 
 import android.app.Notification
 import android.content.Context
+import android.os.Build
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -10,8 +11,16 @@ import android.graphics.RectF
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import com.example.hyperisland.xposed.InProcessController
-import com.xzakota.hyper.notification.focus.FocusNotification
 import de.robv.android.xposed.XposedBridge
+import io.github.d4viddf.hyperisland_kit.HyperAction
+import io.github.d4viddf.hyperisland_kit.HyperIslandNotification
+import io.github.d4viddf.hyperisland_kit.HyperPicture
+import io.github.d4viddf.hyperisland_kit.models.CircularProgressInfo
+import io.github.d4viddf.hyperisland_kit.models.ImageTextInfoLeft
+import io.github.d4viddf.hyperisland_kit.models.ImageTextInfoRight
+import io.github.d4viddf.hyperisland_kit.models.PicInfo
+import io.github.d4viddf.hyperisland_kit.models.ProgressTextInfo
+import io.github.d4viddf.hyperisland_kit.models.TextInfo
 
 /**
  * 下载灵动岛通知构建器。
@@ -80,119 +89,97 @@ object DownloadIslandNotification {
                 isMultiFile            -> "全部暂停"
                 else                   -> "暂停"
             }
-            val cancelLabel    = if (isMultiFile) "全部取消" else "取消"
-            val primaryIconRes = if (isPaused) android.R.drawable.ic_media_play
-                                 else          android.R.drawable.ic_media_pause
+            val cancelLabel = if (isMultiFile) "全部取消" else "取消"
 
-            val islandExtras = FocusNotification.buildV3 {
-                val downloadIconKey = createPicture("key_download_icon", downloadIcon)
+            val builder = HyperIslandNotification.Builder(context, "download_island", fileName)
 
-                islandFirstFloat = false
-                enableFloat      = false
-                updatable        = !isComplete
+            builder.addPicture(HyperPicture("key_download_icon", downloadIcon))
 
-                ticker = fileName
-                island {
-                    islandProperty = 1
-                    bigIslandArea {
-                        imageTextInfoLeft {
-                            type = 1
-                            picInfo {
-                                type = 1
-                                pic  = downloadIconKey
-                            }
-                            textInfo {
-                                this.title = islandStateTitle
-                            }
-                        }
-                        if (!isComplete && !isWaiting && !isPaused) {
-                            progressTextInfo {
-                                textInfo {
-                                    this.title = fileName
-                                    narrowFont = true
-                                }
-                                progressInfo {
-                                    this.progress = progress
-                                }
-                            }
-                        } else {
-                            imageTextInfoRight {
-                                type = 2
-                                textInfo {
-                                    this.title = fileName
-                                    narrowFont = true
-                                }
-                            }
-                        }
-                    }
-                    smallIslandArea {
-                        combinePicInfo
-                        {
-                            picInfo {
-                                type = 1
-                                pic = downloadIconKey
-                            }
-                            if (!isComplete && progress > 0) {
-                                progressInfo {
-                                    this.progress = progress
-                                }
-                            }
-                        }
-                    }
-                }
+            builder.setIconTextInfo(
+                picKey  = "key_download_icon",
+                title   = displayTitle,
+                content = displayContent,
+            )
 
-                iconTextInfo {
-                    this.title = displayTitle
-                    content    = displayContent
-                    animIconInfo {
-                        type = 0
-                        src  = downloadIconKey
-                    }
-                }
+            builder.setIslandFirstFloat(false)
+            builder.setEnableFloat(false)
 
-                if (!isComplete && !isWaiting) {
-                    textButton {
-                        addActionInfo {
-                            val primaryAction = Notification.Action.Builder(
-                                Icon.createWithResource(context, primaryIconRes),
-                                primaryLabel,
-                                primaryIntent,
-                            ).build()
-                            action      = createAction("action_primary", primaryAction)
-                            actionTitle = primaryLabel
-                        }
-                        addActionInfo {
-                            val cancelAction = Notification.Action.Builder(
-                                Icon.createWithResource(context, android.R.drawable.ic_delete),
-                                cancelLabel,
-                                cancelPendingIntent,
-                            ).build()
-                            action      = createAction("action_cancel", cancelAction)
-                            actionTitle = cancelLabel
-                        }
-                    }
-                }
+            // 小岛：下载中时带环形进度，其他状态仅图标
+            if (!isComplete && progress > 0) {
+                builder.setSmallIslandCircularProgress("key_download_icon", progress)
+            } else {
+                builder.setSmallIsland("key_download_icon")
             }
 
-            extras.putAll(islandExtras)
+            // 大岛：下载中时左侧状态+右侧环形进度，其他状态左侧状态+右侧文本
+            if (!isComplete && !isWaiting && !isPaused) {
+                builder.setBigIslandInfo(
+                    left = ImageTextInfoLeft(
+                        type     = 1,
+                        picInfo  = PicInfo(type = 1, pic = "key_download_icon"),
+                        textInfo = TextInfo(title = islandStateTitle),
+                    ),
+                    progressText = ProgressTextInfo(
+                        progressInfo = CircularProgressInfo(progress = progress),
+                        textInfo     = TextInfo(title = fileName, narrowFont = true),
+                    ),
+                )
+            } else {
+                builder.setBigIslandInfo(
+                    left = ImageTextInfoLeft(
+                        type     = 1,
+                        picInfo  = PicInfo(type = 1, pic = "key_download_icon"),
+                        textInfo = TextInfo(title = islandStateTitle),
+                    ),
+                    right = ImageTextInfoRight(
+                        type     = 2,
+                        textInfo = TextInfo(title = fileName, narrowFont = true),
+                    ),
+                )
+            }
 
-            // AOD 息屏显示
+            // 按钮：下载中/暂停时显示暂停/恢复 + 取消
+            if (!isComplete && !isWaiting) {
+                // 文本模式（无图标），避免 TextButtonInfo.actionIcon 指向不存在的 pic 键
+                val primaryAction = HyperAction(
+                    key              = "action_primary",
+                    title            = primaryLabel,
+                    pendingIntent    = primaryIntent,
+                    actionIntentType = 2,
+                )
+                val cancelAction = HyperAction(
+                    key              = "action_cancel",
+                    title            = cancelLabel,
+                    pendingIntent    = cancelPendingIntent,
+                    actionIntentType = 2,
+                )
+                builder.addHiddenAction(primaryAction)
+                builder.addHiddenAction(cancelAction)
+                builder.setTextButtons(primaryAction, cancelAction)
+            }
+
+            val resourceBundle = builder.buildResourceBundle()
+            extras.putAll(resourceBundle)
+            // HyperOS 从 extras 顶层查找 action，将嵌套 bundle 展开
+            flattenActionsToExtras(resourceBundle, extras)
+
+            // AOD 息屏显示 + updatable
             val aodTitle = when {
                 isComplete -> "下载完成"
                 isPaused   -> "已暂停 $progress%"
                 isWaiting  -> "等待中"
                 else       -> if (progress >= 0) "下载中 $progress%" else "下载中"
             }
-            val existingParam = extras.getString("miui.focus.param")
-            if (existingParam != null) {
-                try {
-                    val json = org.json.JSONObject(existingParam)
-                    val pv2  = json.optJSONObject("param_v2") ?: org.json.JSONObject()
-                    pv2.put("aodTitle", aodTitle)
-                    json.put("param_v2", pv2)
-                    extras.putString("miui.focus.param", json.toString())
-                } catch (_: Exception) {}
-            }
+            // 修正 textButton 字段名 + 注入 aodTitle/updatable
+            val finalJson = try {
+                val json = org.json.JSONObject(fixTextButtonJson(builder.buildJsonParam()))
+                val pv2  = json.optJSONObject("param_v2") ?: org.json.JSONObject()
+                pv2.put("aodTitle", aodTitle)
+                pv2.put("updatable", !isComplete)
+                json.put("param_v2", pv2)
+                json.toString()
+            } catch (_: Exception) { builder.buildJsonParam() }
+            extras.putString("miui.focus.param", finalJson)
 
             val stateTag = when {
                 isComplete -> "done"
@@ -204,6 +191,38 @@ object DownloadIslandNotification {
 
         } catch (e: Exception) {
             XposedBridge.log("HyperIsland[Download]: Island injection error: ${e.message}")
+        }
+    }
+
+    /**
+     * 将 textButton 数组里新库输出的 "actionIntent"+"actionIntentType"
+     * 替换为 HyperOS V3 协议所需的 "action" 字段，否则按钮点击无响应。
+     */
+    private fun fixTextButtonJson(jsonParam: String): String {
+        return try {
+            val json = org.json.JSONObject(jsonParam)
+            val pv2  = json.optJSONObject("param_v2") ?: return jsonParam
+            val btns = pv2.optJSONArray("textButton") ?: return jsonParam
+            for (i in 0 until btns.length()) {
+                val btn = btns.getJSONObject(i)
+                val key = btn.optString("actionIntent").takeIf { it.isNotEmpty() } ?: continue
+                btn.put("action", key)
+                btn.remove("actionIntent")
+                btn.remove("actionIntentType")
+            }
+            json.toString()
+        } catch (_: Exception) { jsonParam }
+    }
+
+    /** 将 buildResourceBundle() 里嵌套的 "miui.focus.actions" 展开到 extras 顶层 */
+    private fun flattenActionsToExtras(resourceBundle: Bundle, extras: Bundle) {
+        val nested = resourceBundle.getBundle("miui.focus.actions") ?: return
+        for (key in nested.keySet()) {
+            val action: Notification.Action? = if (Build.VERSION.SDK_INT >= 33)
+                nested.getParcelable(key, Notification.Action::class.java)
+            else
+                @Suppress("DEPRECATION") nested.getParcelable(key)
+            if (action != null) extras.putParcelable(key, action)
         }
     }
 

@@ -1,4 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        超级岛广播权限（signature 级）。
+        仅与 HyperIsland 使用相同签名的应用可获得此权限，
+        保证只有本应用能触发 SystemUI 进程内的 IslandDispatcher Receiver。
+    -->
+    <permission
+        android:name="com.example.hyperisland.SEND_ISLAND"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.example.hyperisland.SEND_ISLAND" />
+
     <!-- 通知权限 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- 下载管理权限 -->

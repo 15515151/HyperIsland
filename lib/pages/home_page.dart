@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/section_label.dart';
 
@@ -15,6 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final HomeController _ctrl;
   bool _restarting = false;
+  String _version = '';
 
   @override
   void initState() {
@@ -22,6 +24,9 @@ class _HomePageState extends State<HomePage> {
     _ctrl = HomeController();
     _ctrl.addListener(() {
       if (mounted) setState(() {});
+    });
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _version = 'v${info.version}');
     });
   }
 
@@ -108,7 +113,20 @@ class _HomePageState extends State<HomePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar.large(
-            title: const Text('HyperIsland'),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('HyperIsland'),
+                if (_version.isNotEmpty)
+                  Text(
+                    _version,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+              ],
+            ),
             backgroundColor: cs.surface,
             centerTitle: false,
             actions: [
@@ -137,18 +155,15 @@ class _HomePageState extends State<HomePage> {
 
                 const SectionLabel('通知测试'),
                 const SizedBox(height: 8),
-                if (_ctrl.progress > 0 && _ctrl.progress < 100)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _ProgressCard(progress: _ctrl.progress),
+                FilledButton.icon(
+                  onPressed: _ctrl.isSending ? null : _ctrl.sendTest,
+                  icon: const Icon(Icons.notifications_active_outlined),
+                  label: const Text('发送测试通知'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                _TestButtons(
-                  isSending: _ctrl.isSending,
-                  onStartDemo: _ctrl.startProgressDemo,
-                  onIndeterminate: () => _ctrl.sendTestNotification('indeterminate'),
-                  onComplete: () => _ctrl.sendTestNotification('complete'),
-                  onFailed: () => _ctrl.sendTestNotification('failed'),
-                  onCustom: () => _ctrl.sendTestNotification('custom'),
                 ),
                 const SizedBox(height: 24),
 
@@ -262,159 +277,13 @@ class _ModuleStatusCard extends StatelessWidget {
   }
 }
 
-class _ProgressCard extends StatelessWidget {
-  final double progress;
-  const _ProgressCard({required this.progress});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('下载进度',
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge
-                        ?.copyWith(color: cs.onSurfaceVariant)),
-                Text('${progress.toInt()}%',
-                    style: Theme.of(context).textTheme.labelMedium),
-              ],
-            ),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: progress / 100,
-                minHeight: 6,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TestButtons extends StatelessWidget {
-  final bool isSending;
-  final VoidCallback onStartDemo;
-  final VoidCallback onIndeterminate;
-  final VoidCallback onComplete;
-  final VoidCallback onFailed;
-  final VoidCallback onCustom;
-
-  const _TestButtons({
-    required this.isSending,
-    required this.onStartDemo,
-    required this.onIndeterminate,
-    required this.onComplete,
-    required this.onFailed,
-    required this.onCustom,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FilledButton.icon(
-          onPressed: isSending ? null : onStartDemo,
-          icon: const Icon(Icons.play_circle_outline),
-          label: const Text('开始进度演示'),
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _OutlinedActionButton(
-                icon: Icons.hourglass_empty,
-                label: '不确定进度',
-                onPressed: isSending ? null : onIndeterminate,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _OutlinedActionButton(
-                icon: Icons.check_circle_outline,
-                label: '下载完成',
-                onPressed: isSending ? null : onComplete,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _OutlinedActionButton(
-                icon: Icons.error_outline,
-                label: '下载失败',
-                onPressed: isSending ? null : onFailed,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _OutlinedActionButton(
-                icon: Icons.notifications_outlined,
-                label: '自定义通知',
-                onPressed: isSending ? null : onCustom,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _OutlinedActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onPressed;
-
-  const _OutlinedActionButton({
-    required this.icon,
-    required this.label,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontSize: 13)),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-}
-
 class _NotesCard extends StatelessWidget {
   const _NotesCard();
 
   static const _items = [
     '1.此页面仅用于测试是否支持超级岛，并不代表实际效果',
     '2.请在 HyperCeiler 中关闭系统界面和小米服务框架的焦点通知白名单',
-    '3.LSPosed 管理器中激活后，必须并重启相关作用域软件',
+    '3.LSPosed 管理器中激活后，必须重启相关作用域软件',
     '4.支持通用适配，自行勾选合适的模板尝试',
   ];
 

@@ -52,7 +52,7 @@ class ChannelInfo {
 
 class WhitelistController extends ChangeNotifier {
   List<AppInfo> _allApps = [];
-  // 排好序的稳定列表，仅在 _load() 时重新排序，切换开关不改变顺序。
+  // 稳定列表：切换开关时不重排，仅 _resort() 时更新
   List<AppInfo> _sortedApps = [];
   Set<String> enabledPackages = {};
   bool loading = true;
@@ -63,17 +63,27 @@ class WhitelistController extends ChangeNotifier {
     _load();
   }
 
+  void _resort() {
+    _sortedApps = List<AppInfo>.from(_allApps)
+      ..sort((a, b) {
+        final aOn = enabledPackages.contains(a.packageName);
+        final bOn = enabledPackages.contains(b.packageName);
+        if (aOn != bOn) return aOn ? -1 : 1;
+        return a.appName.compareTo(b.appName);
+      });
+  }
+
   List<AppInfo> get filteredApps {
     final q = _searchQuery.toLowerCase();
-    final source = showSystemApps
+    Iterable<AppInfo> source = showSystemApps
         ? _sortedApps
-        : _sortedApps.where((a) => !a.isSystem).toList();
-    if (q.isEmpty) return source is List<AppInfo> ? source : source.toList();
-    return source
-        .where((a) =>
-            a.appName.toLowerCase().contains(q) ||
-            a.packageName.toLowerCase().contains(q))
-        .toList();
+        : _sortedApps.where((a) => !a.isSystem || enabledPackages.contains(a.packageName));
+    if (q.isNotEmpty) {
+      source = source.where((a) =>
+          a.appName.toLowerCase().contains(q) ||
+          a.packageName.toLowerCase().contains(q));
+    }
+    return source is List<AppInfo> ? source : source.toList();
   }
 
   Future<void> refresh() => _load();
@@ -100,15 +110,7 @@ class WhitelistController extends ChangeNotifier {
           isSystem: map['isSystem'] as bool? ?? false,
         );
       }).toList();
-
-      // 加载完成后按「已启用优先，组内字母序」排序，后续切换开关不重新排序。
-      _sortedApps = List<AppInfo>.from(_allApps)
-        ..sort((a, b) {
-          final aOn = enabledPackages.contains(a.packageName) && !a.isSystem;
-          final bOn = enabledPackages.contains(b.packageName) && !b.isSystem;
-          if (aOn != bOn) return aOn ? -1 : 1;
-          return a.appName.compareTo(b.appName);
-        });
+      _resort();
     } catch (e) {
       debugPrint('WhitelistController._load error: $e');
     }
@@ -125,16 +127,19 @@ class WhitelistController extends ChangeNotifier {
     }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(kPrefGenericWhitelist, enabledPackages.join(','));
+    // 切换开关：不重排，直接通知
     notifyListeners();
   }
 
   void setSearch(String query) {
     _searchQuery = query;
+    _resort();
     notifyListeners();
   }
 
   void setShowSystemApps(bool value) {
     showSystemApps = value;
+    _resort();
     notifyListeners();
   }
 

@@ -61,8 +61,15 @@ flutter {
     source = "../.."
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("androidx.core:core:1.15.0")
+        force("androidx.core:core-ktx:1.15.0")
+    }
+}
+
 dependencies {
-    implementation("com.xzakota.hyper.notification:focus-api:1.4")
+    implementation("io.github.d4viddf:hyperisland_kit:0.4.3")
     compileOnly("de.robv.android.xposed:api:82")
     compileOnly("de.robv.android.xposed:api:82:sources")
 }

@@ -12,7 +12,6 @@ import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodCall
 import com.example.hyperisland.xposed.registeredTemplates
 import java.io.ByteArrayOutputStream
 
@@ -22,15 +21,26 @@ class MainActivity : FlutterActivity() {
     private val REQUEST_NOTIFICATION_PERMISSION = 1001
     private val REQUEST_APP_LIST_PERMISSION     = 1002
 
-    private var pendingResult: MethodChannel.Result? = null
-    private var pendingCall: MethodCall? = null
-
     private var pendingAppsResult: MethodChannel.Result? = null
     private var pendingAppsIncludeSystem: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkAndRequestNotificationPermission()
+        if (isModuleActive()) {
+            val icon = packageManager.getAppIcon(packageName)
+            com.example.hyperisland.xposed.IslandDispatcher.sendBroadcast(
+                this,
+                com.example.hyperisland.xposed.IslandRequest(
+                    title            = "HyperIsland",
+                    content          = "欢迎使用",
+                    icon             = icon,
+                    firstFloat       = false,
+                    highlightColor   = "#E040FB",
+                    showNotification = false,
+                )
+            )
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -38,54 +48,9 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
-                "showProgress" -> {
-                    if (checkNotificationPermission()) {
-                        handleShowProgress(call, result)
-                    } else {
-                        pendingResult = result
-                        pendingCall = call
-                        requestNotificationPermission()
-                    }
-                }
-
-                "showComplete" -> {
-                    if (checkNotificationPermission()) {
-                        handleShowComplete(call, result)
-                    } else {
-                        pendingResult = result
-                        pendingCall = call
-                        requestNotificationPermission()
-                    }
-                }
-
-                "showFailed" -> {
-                    if (checkNotificationPermission()) {
-                        handleShowFailed(call, result)
-                    } else {
-                        pendingResult = result
-                        pendingCall = call
-                        requestNotificationPermission()
-                    }
-                }
-
-                "showIndeterminate" -> {
-                    if (checkNotificationPermission()) {
-                        handleShowIndeterminate(call, result)
-                    } else {
-                        pendingResult = result
-                        pendingCall = call
-                        requestNotificationPermission()
-                    }
-                }
-
-                "showCustom" -> {
-                    if (checkNotificationPermission()) {
-                        handleShowCustom(call, result)
-                    } else {
-                        pendingResult = result
-                        pendingCall = call
-                        requestNotificationPermission()
-                    }
+                "showTest" -> {
+                    // 通过广播由 SystemUI 发送，无需本地通知权限
+                    handleShowTest(result)
                 }
 
                 "getTemplates" -> {
@@ -497,121 +462,29 @@ class MainActivity : FlutterActivity() {
         }
 
         if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
-            val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-
-            if (granted && pendingCall != null && pendingResult != null) {
-                // 重新执行被挂起的调用
-                when (pendingCall!!.method) {
-                    "showProgress" -> handleShowProgress(pendingCall!!, pendingResult!!)
-                    "showComplete" -> handleShowComplete(pendingCall!!, pendingResult!!)
-                    "showFailed" -> handleShowFailed(pendingCall!!, pendingResult!!)
-                    "showIndeterminate" -> handleShowIndeterminate(pendingCall!!, pendingResult!!)
-                    "showCustom" -> handleShowCustom(pendingCall!!, pendingResult!!)
-                }
-                pendingResult = null
-                pendingCall = null
-            } else if (!granted) {
-                pendingResult?.success(false)
-                pendingResult = null
-                pendingCall = null
+            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Log.w(TAG, "Notification permission denied")
             }
         }
     }
 
-    private fun handleShowProgress(call: MethodCall, result: MethodChannel.Result) {
+    private fun handleShowTest(result: MethodChannel.Result) {
         try {
-            val title = call.argument<String>("title") ?: "下载中"
-            val fileName = call.argument<String>("fileName") ?: ""
-            val progress = call.argument<Int>("progress") ?: 0
-            val speed = call.argument<String>("speed") ?: ""
-            val remainingTime = call.argument<String>("remainingTime") ?: ""
-
-            val success = HyperIslandHelper.showDownloadProgress(
+            val icon = packageManager.getAppIcon(packageName)
+            com.example.hyperisland.xposed.IslandDispatcher.sendBroadcast(
                 this,
-                title,
-                fileName,
-                progress,
-                speed,
-                remainingTime
+                com.example.hyperisland.xposed.IslandRequest(
+                    title            = "HyperIsland",
+                    content          = "欢迎使用",
+                    icon             = icon,
+                    firstFloat       = false,
+                    highlightColor   = "#E040FB",
+                    showNotification = true,
+                )
             )
-            result.success(success)
+            result.success(true)
         } catch (e: Exception) {
-            Log.e(TAG, "Error showing progress", e)
-            result.error("ERROR", e.message, null)
-        }
-    }
-
-    private fun handleShowComplete(call: MethodCall, result: MethodChannel.Result) {
-        try {
-            val title = call.argument<String>("title") ?: "下载完成"
-            val fileName = call.argument<String>("fileName") ?: ""
-
-            val success = HyperIslandHelper.showDownloadComplete(
-                this,
-                title,
-                fileName
-            )
-            result.success(success)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error showing complete", e)
-            result.error("ERROR", e.message, null)
-        }
-    }
-
-    private fun handleShowFailed(call: MethodCall, result: MethodChannel.Result) {
-        try {
-            val title = call.argument<String>("title") ?: "下载失败"
-            val fileName = call.argument<String>("fileName") ?: ""
-            val error = call.argument<String>("error") ?: ""
-
-            val success = HyperIslandHelper.showDownloadFailed(
-                this,
-                title,
-                fileName,
-                error
-            )
-            result.success(success)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error showing failed", e)
-            result.error("ERROR", e.message, null)
-        }
-    }
-
-    private fun handleShowIndeterminate(call: MethodCall, result: MethodChannel.Result) {
-        try {
-            val title = call.argument<String>("title") ?: ""
-            val content = call.argument<String>("content") ?: ""
-
-            val success = HyperIslandHelper.showIndeterminateProgress(
-                this,
-                title,
-                content
-            )
-            result.success(success)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error showing indeterminate", e)
-            result.error("ERROR", e.message, null)
-        }
-    }
-
-    private fun handleShowCustom(call: MethodCall, result: MethodChannel.Result) {
-        try {
-            val type = call.argument<String>("type") ?: "custom"
-            val title = call.argument<String>("title") ?: ""
-            val content = call.argument<String>("content") ?: ""
-            val icon = call.argument<String>("icon")
-
-            val success = HyperIslandHelper.showCustomFocus(
-                this,
-                type,
-                title,
-                content,
-                icon
-            )
-            result.success(success)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error showing custom", e)
+            Log.e(TAG, "Error showing test notification", e)
             result.error("ERROR", e.message, null)
         }
     }
