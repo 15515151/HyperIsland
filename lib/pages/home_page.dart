@@ -8,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/section_label.dart';
 
-const _channel = MethodChannel('com.example.hyperisland/test');
+const _channel = MethodChannel('io.github.hyperisland/test');
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

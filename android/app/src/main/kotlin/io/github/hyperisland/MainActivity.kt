@@ -1,4 +1,4 @@
-package com.example.hyperisland
+package io.github.hyperisland
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -10,11 +10,11 @@ import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import com.example.hyperisland.xposed.registeredTemplates
+import io.github.hyperisland.xposed.registeredTemplates
 import java.io.ByteArrayOutputStream
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.example.hyperisland/test"
+    private val CHANNEL = "io.github.hyperisland/test"
     private val TAG = "HyperIsland"
     private val REQUEST_APP_LIST_PERMISSION = 1002
 
@@ -25,11 +25,11 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
         if (isModuleActive()) {
             val icon = packageManager.getAppIcon(packageName)
-            com.example.hyperisland.xposed.IslandDispatcher.sendBroadcast(
+            io.github.hyperisland.xposed.IslandDispatcher.sendBroadcast(
                 this,
-                com.example.hyperisland.xposed.IslandRequest(
-                    title            = "HyperIsland",
-                    content          = "欢迎使用",
+                io.github.hyperisland.xposed.IslandRequest(
+                    title            = "欢迎使用",
+                    content          = "HyperIsland",
                     icon             = icon,
                     firstFloat       = false,
                     highlightColor   = "#E040FB",
@@ -416,9 +416,9 @@ class MainActivity : FlutterActivity() {
     private fun handleShowTest(result: MethodChannel.Result) {
         try {
             val icon = packageManager.getAppIcon(packageName)
-            com.example.hyperisland.xposed.IslandDispatcher.sendBroadcast(
+            io.github.hyperisland.xposed.IslandDispatcher.sendBroadcast(
                 this,
-                com.example.hyperisland.xposed.IslandRequest(
+                io.github.hyperisland.xposed.IslandRequest(
                     title            = "欢迎使用",
                     content          = "HyperIsland",
                     icon             = icon,

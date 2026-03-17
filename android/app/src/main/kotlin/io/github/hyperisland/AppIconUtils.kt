@@ -1,4 +1,4 @@
-package com.example.hyperisland
+package io.github.hyperisland
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

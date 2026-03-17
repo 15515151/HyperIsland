@@ -1,7 +1,7 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
-import com.example.hyperisland.xposed.templates.GenericProgressIslandNotification
-import com.example.hyperisland.xposed.templates.NotificationIslandNotification
+import io.github.hyperisland.xposed.templates.GenericProgressIslandNotification
+import io.github.hyperisland.xposed.templates.NotificationIslandNotification
 
 /**
  * 可供 Flutter 读取的模板元数据列表（无 Xposed 依赖）。

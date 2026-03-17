@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
@@ -15,7 +15,7 @@ class DownloadControlReceiver : BroadcastReceiver() {
 
     companion object {
         private const val TAG = "HyperIsland_Control"
-        const val ACTION_CONTROL = "com.example.hyperisland.DOWNLOAD_CONTROL"
+        const val ACTION_CONTROL = "io.github.hyperisland.DOWNLOAD_CONTROL"
         const val EXTRA_ACTION = "action"
         const val EXTRA_DOWNLOAD_ID = "downloadId"
         const val EXTRA_FILE_NAME = "fileName"

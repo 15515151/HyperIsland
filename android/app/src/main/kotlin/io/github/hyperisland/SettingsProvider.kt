@@ -1,4 +1,4 @@
-package com.example.hyperisland
+package io.github.hyperisland
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -15,7 +15,7 @@ import android.net.Uri
 class SettingsProvider : ContentProvider() {
 
     companion object {
-        const val AUTHORITY = "com.example.hyperisland.settings"
+        const val AUTHORITY = "io.github.hyperisland.settings"
     }
 
     private val prefs by lazy {
@@ -38,7 +38,7 @@ class SettingsProvider : ContentProvider() {
         uri: Uri, projection: Array<String>?, selection: String?,
         selectionArgs: Array<String>?, sortOrder: String?
     ): Cursor {
-        // URI 格式: content://com.example.hyperisland.settings/<key>
+        // URI 格式: content://io.github.hyperisland.settings/<key>
         val segment = uri.lastPathSegment ?: return MatrixCursor(arrayOf("value"))
         val flutterKey = "flutter.$segment"
         val cursor = MatrixCursor(arrayOf("value"))

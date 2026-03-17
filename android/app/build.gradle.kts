@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.hyperisland"
+    namespace = "io.github.hyperisland"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -30,7 +30,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.hyperisland"
+        applicationId = "io.github.hyperisland"
         minSdk = 27
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

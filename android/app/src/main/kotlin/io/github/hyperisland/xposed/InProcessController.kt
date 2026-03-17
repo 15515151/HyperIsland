@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import android.app.DownloadManager
 import android.app.Notification
@@ -13,8 +13,8 @@ import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import com.example.hyperisland.getAppIcon
-import com.example.hyperisland.xposed.templates.DownloadIslandNotification
+import io.github.hyperisland.getAppIcon
+import io.github.hyperisland.xposed.templates.DownloadIslandNotification
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
@@ -27,7 +27,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
  */
 object InProcessController {
 
-    private const val ACTION          = "com.example.hyperisland.INTERNAL_CTRL"
+    private const val ACTION          = "io.github.hyperisland.INTERNAL_CTRL"
     private const val EXTRA_CMD       = "cmd"
     private const val EXTRA_ID        = "dlId"
     private const val EXTRA_NOTIF_ID  = "notifId"
@@ -91,7 +91,7 @@ object InProcessController {
         loadSettings(appCtx)
 
         // 注册 ContentObserver，实时监听设置变化
-        val settingsUri = android.net.Uri.parse("content://com.example.hyperisland.settings/")
+        val settingsUri = android.net.Uri.parse("content://io.github.hyperisland.settings/")
         appCtx.contentResolver.registerContentObserver(
             settingsUri, true,
             object : android.database.ContentObserver(android.os.Handler(android.os.Looper.getMainLooper())) {
@@ -480,7 +480,7 @@ object InProcessController {
     /** 通过模块 ContentProvider 查询布尔设置，默认值 [default] */
     private fun readBooleanSetting(context: Context, key: String, default: Boolean): Boolean {
         return try {
-            val uri = android.net.Uri.parse("content://com.example.hyperisland.settings/$key")
+            val uri = android.net.Uri.parse("content://io.github.hyperisland.settings/$key")
             val cursor = context.contentResolver.query(uri, null, null, null, null)
             cursor?.use { if (it.moveToFirst()) it.getInt(0) != 0 else default } ?: default
         } catch (e: Exception) {

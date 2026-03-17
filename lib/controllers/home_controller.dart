@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class HomeController extends ChangeNotifier {
-  static const _platform = MethodChannel('com.example.hyperisland/test');
+  static const _platform = MethodChannel('io.github.hyperisland/test');
 
   bool isSending = false;
   bool? moduleActive; // null = 检测中

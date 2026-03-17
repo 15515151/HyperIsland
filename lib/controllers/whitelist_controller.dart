@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _channel = MethodChannel('com.example.hyperisland/test');
+const _channel = MethodChannel('io.github.hyperisland/test');
 const kPrefGenericWhitelist = 'pref_generic_whitelist';
 
 /// 可用的灵动岛通知模板标识符。

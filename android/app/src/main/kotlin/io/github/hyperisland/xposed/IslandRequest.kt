@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import android.content.Intent
 import android.graphics.drawable.Icon

@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook

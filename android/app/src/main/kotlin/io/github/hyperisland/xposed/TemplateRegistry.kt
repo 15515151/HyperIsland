@@ -1,9 +1,9 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import android.content.Context
 import android.os.Bundle
-import com.example.hyperisland.xposed.templates.GenericProgressIslandNotification
-import com.example.hyperisland.xposed.templates.NotificationIslandNotification
+import io.github.hyperisland.xposed.templates.GenericProgressIslandNotification
+import io.github.hyperisland.xposed.templates.NotificationIslandNotification
 import de.robv.android.xposed.XposedBridge
 
 /**

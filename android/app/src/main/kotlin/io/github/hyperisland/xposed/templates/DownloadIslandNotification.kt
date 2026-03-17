@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed.templates
+package io.github.hyperisland.xposed.templates
 
 import android.app.Notification
 import android.content.Context
@@ -10,7 +10,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.Icon
 import android.os.Bundle
-import com.example.hyperisland.xposed.InProcessController
+import io.github.hyperisland.xposed.InProcessController
 import de.robv.android.xposed.XposedBridge
 import io.github.d4viddf.hyperisland_kit.HyperAction
 import io.github.d4viddf.hyperisland_kit.HyperIslandNotification

@@ -12,7 +12,26 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Read(//mnt/c/Users/1812z/Documents/GitHub/**)",
-      "Bash(flutter pub:*)"
+      "Bash(flutter pub:*)",
+      "WebFetch(domain:hyperisland.d4viddf.com)",
+      "WebFetch(domain:central.sonatype.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/D4vidDf/HyperIsland-ToolKit/main/hyperisland-kit/src/main/kotlin/io/github/d4viddf/hyperisland_kit/HyperIslandNotification.kt\" 2>/dev/null | head -200)",
+      "Bash(curl -s \"https://api.github.com/repos/D4vidDf/HyperIsland-ToolKit/git/trees/main?recursive=1\" 2>/dev/null | python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(item['path']\\) for item in data.get\\('tree',[]\\) if item['path'].endswith\\('.kt'\\)]\")",
+      "Bash(curl -L -s \"https://repo1.maven.org/maven2/io/github/d4viddf/hyperisland_kit/0.4.3/hyperisland_kit-0.4.3-sources.jar\" -o /tmp/hyperisland_kit_sources.jar 2>&1 && echo \"Downloaded\" || echo \"Failed\")",
+      "Bash(cd /tmp && jar -tf hyperisland_kit_sources.jar | grep \"\\\\.kt$\" | head -60)",
+      "Bash(cd /tmp && unzip -l hyperisland_kit_sources.jar | grep \"\\\\.kt$\")",
+      "Bash(cd /tmp && unzip -p hyperisland_kit_sources.jar \"io/github/d4viddf/hyperisland_kit/HyperIslandNotification.kt\")",
+      "Bash(cd /tmp && for f in \"models/ProgressTextInfo.kt\" \"models/ProgressInfo.kt\" \"models/ImageTextInfoLeft.kt\" \"models/ImageTextInfoRight.kt\" \"models/TextInfo.kt\" \"models/PicInfo.kt\" \"models/ParamV2.kt\" \"models/HyperIslandModels.kt\"; do echo \"=== $f ===\"; unzip -p hyperisland_kit_sources.jar \"io/github/d4viddf/hyperisland_kit/$f\"; done)",
+      "Bash(find \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" -name \"*.aar\" -o -name \"*.jar\" 2>/dev/null | head -20)",
+      "Bash(find \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" -path \"*hyperisland*kit*\" -name \"*.aar\" 2>/dev/null; find \"C:\\\\Users\\\\1812z\\\\.gradle\" -path \"*hyperisland*kit*\" -name \"*.aar\" 2>/dev/null | head -5)",
+      "Read(//tmp/**)",
+      "Bash(jar tf:*)",
+      "Bash(cd /tmp/hik && python3 -c \"\nimport zipfile\nwith zipfile.ZipFile\\('classes.jar'\\) as z:\n    for f in z.namelist\\(\\):\n        if 'Hyper' in f or 'Island' in f or 'Param' in f:\n            print\\(f\\)\n\")",
+      "Bash(python3 -c \"\nimport zipfile\nwith zipfile.ZipFile\\('/tmp/hik/classes.jar'\\) as z:\n    for f in z.namelist\\(\\):\n        print\\(f\\)\n\" 2>&1 | head -40)",
+      "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" && flutter analyze lib/pages/settings_page.dart lib/controllers/config_io_controller.dart 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" && sed -i 's/com\\\\.example\\\\.hyperisland/io.github.hyperisland/g' android/app/src/main/AndroidManifest.xml android/app/proguard-rules.pro android/app/src/main/assets/xposed_init)",
+      "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland/android/app/src/main/kotlin\" && mkdir -p io/github && cp -r com/example/hyperisland io/github/hyperisland && echo \"copied\")",
+      "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland/android/app/src/main/kotlin\" && rm -rf com && echo \"removed old\")"
     ]
   }
 }

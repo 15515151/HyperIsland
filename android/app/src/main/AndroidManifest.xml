@@ -5,9 +5,9 @@
         保证只有本应用能触发 SystemUI 进程内的 IslandDispatcher Receiver。
     -->
     <permission
-        android:name="com.example.hyperisland.SEND_ISLAND"
+        android:name="io.github.hyperisland.SEND_ISLAND"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.example.hyperisland.SEND_ISLAND" />
+    <uses-permission android:name="io.github.hyperisland.SEND_ISLAND" />
 
     <!-- 下载管理权限 -->
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
@@ -62,12 +62,12 @@
             android:value="82" />
         <meta-data
             android:name="xposedscope"
-            android:value="com.example.hyperisland;com.android.providers.downloads;com.xiaomi.android.app.downloadmanager;com.android.systemui" />
+            android:value="io.github.hyperisland;com.android.providers.downloads;com.xiaomi.android.app.downloadmanager;com.android.systemui" />
 
         <!-- 设置 Provider，供 Xposed Hook 进程跨进程读取 -->
         <provider
             android:name=".SettingsProvider"
-            android:authorities="com.example.hyperisland.settings"
+            android:authorities="io.github.hyperisland.settings"
             android:exported="true" />
 
         <!-- 下载控制接收器 -->
@@ -76,7 +76,7 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.example.hyperisland.DOWNLOAD_CONTROL"/>
+                <action android:name="io.github.hyperisland.DOWNLOAD_CONTROL"/>
             </intent-filter>
         </receiver>
     </application>

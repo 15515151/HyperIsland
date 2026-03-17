@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
@@ -13,10 +13,10 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class SelfHook : IXposedHookLoadPackage {
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        if (lpparam.packageName != "com.example.hyperisland") return
+        if (lpparam.packageName != "io.github.hyperisland") return
         try {
             val mainActivityClass = lpparam.classLoader
-                .loadClass("com.example.hyperisland.MainActivity")
+                .loadClass("io.github.hyperisland.MainActivity")
             XposedHelpers.findAndHookMethod(
                 mainActivityClass,
                 "isModuleActive",

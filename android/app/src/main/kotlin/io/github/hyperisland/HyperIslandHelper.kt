@@ -1,9 +1,9 @@
-package com.example.hyperisland
+package io.github.hyperisland
 
 import android.content.Context
 import android.util.Log
-import com.example.hyperisland.xposed.IslandDispatcher
-import com.example.hyperisland.xposed.IslandRequest
+import io.github.hyperisland.xposed.IslandDispatcher
+import io.github.hyperisland.xposed.IslandRequest
 
 /**
  * HyperIsland 应用侧超级岛发送入口。

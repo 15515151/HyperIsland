@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import android.app.Notification
 import android.content.Context
@@ -41,7 +41,7 @@ fun Icon.toRounded(context: Context, radiusFraction: Float = 0.25f): Icon {
 
 private fun isRoundIconEnabled(context: Context): Boolean {
     return try {
-        val uri = android.net.Uri.parse("content://com.example.hyperisland.settings/pref_round_icon")
+        val uri = android.net.Uri.parse("content://io.github.hyperisland.settings/pref_round_icon")
         context.contentResolver.query(uri, null, null, null, null)
             ?.use { if (it.moveToFirst()) it.getInt(0) != 0 else true } ?: true
     } catch (_: Exception) {

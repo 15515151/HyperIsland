@@ -5,9 +5,9 @@
 -keep class * implements de.robv.android.xposed.IXposedHookZygoteInit { *; }
 
 # Keep all Xposed module classes
--keep class com.example.hyperisland.xposed.** { *; }
+-keep class io.github.hyperisland.xposed.** { *; }
 
 # Keep isModuleActive so LSPosed can hook it by name in release builds
--keepclassmembers class com.example.hyperisland.MainActivity {
+-keepclassmembers class io.github.hyperisland.MainActivity {
     public boolean isModuleActive();
 }

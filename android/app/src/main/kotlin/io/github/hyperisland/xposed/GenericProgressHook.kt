@@ -1,9 +1,9 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import android.app.Notification
 import android.service.notification.StatusBarNotification
-import com.example.hyperisland.xposed.templates.GenericProgressIslandNotification
-import com.example.hyperisland.xposed.templates.NotificationIslandNotification
+import io.github.hyperisland.xposed.templates.GenericProgressIslandNotification
+import io.github.hyperisland.xposed.templates.NotificationIslandNotification
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
@@ -38,7 +38,7 @@ class GenericProgressHook : IXposedHookLoadPackage {
         /** 在 SystemUI 进程首次处理通知时注册，监听设置变化并实时清空缓存。 */
         fun ensureObserver(context: android.content.Context) {
             if (observerRegistered) return
-            val settingsUri = android.net.Uri.parse("content://com.example.hyperisland.settings/")
+            val settingsUri = android.net.Uri.parse("content://io.github.hyperisland.settings/")
             context.contentResolver.registerContentObserver(
                 settingsUri, true,
                 object : android.database.ContentObserver(android.os.Handler(android.os.Looper.getMainLooper())) {
@@ -68,7 +68,7 @@ class GenericProgressHook : IXposedHookLoadPackage {
             cachedChannelSettings[cacheKey]?.let { return it }
             return try {
                 val uri = android.net.Uri.parse(
-                    "content://com.example.hyperisland.settings/$prefKey"
+                    "content://io.github.hyperisland.settings/$prefKey"
                 )
                 val value = context.contentResolver
                     .query(uri, null, null, null, null)
@@ -93,7 +93,7 @@ class GenericProgressHook : IXposedHookLoadPackage {
             return try {
                 val key = "pref_channel_template_${pkg}_$channelId"
                 val uri = android.net.Uri.parse(
-                    "content://com.example.hyperisland.settings/$key"
+                    "content://io.github.hyperisland.settings/$key"
                 )
                 val template = context.contentResolver
                     .query(uri, null, null, null, null)
@@ -111,7 +111,7 @@ class GenericProgressHook : IXposedHookLoadPackage {
             cachedWhitelist?.let { return it }
             return try {
                 val uri = android.net.Uri.parse(
-                    "content://com.example.hyperisland.settings/pref_generic_whitelist"
+                    "content://io.github.hyperisland.settings/pref_generic_whitelist"
                 )
                 val csv = context.contentResolver.query(uri, null, null, null, null)
                     ?.use { if (it.moveToFirst()) it.getString(0) else "" }
@@ -121,7 +121,7 @@ class GenericProgressHook : IXposedHookLoadPackage {
                     .filter { it.isNotBlank() }
                     .associate { pkg ->
                         val channelUri = android.net.Uri.parse(
-                            "content://com.example.hyperisland.settings/pref_channels_$pkg"
+                            "content://io.github.hyperisland.settings/pref_channels_$pkg"
                         )
                         val channelCsv = context.contentResolver
                             .query(channelUri, null, null, null, null)

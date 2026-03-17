@@ -1,4 +1,4 @@
-package com.example.hyperisland.xposed
+package io.github.hyperisland.xposed
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -46,13 +46,13 @@ import io.github.d4viddf.hyperisland_kit.models.TextInfo
 object IslandDispatcher {
 
     /** 广播 Action，由 HyperIsland 应用发出，由 SystemUI 进程内 Receiver 接收。*/
-    const val ACTION   = "com.example.hyperisland.ACTION_SHOW_ISLAND"
+    const val ACTION   = "io.github.hyperisland.ACTION_SHOW_ISLAND"
 
     /**
      * 广播发送方所需权限（signature 级）。
      * 只有与 HyperIsland 使用相同签名的应用才能获得此权限并触发 Receiver。
      */
-    const val PERM     = "com.example.hyperisland.SEND_ISLAND"
+    const val PERM     = "io.github.hyperisland.SEND_ISLAND"
 
     /** 默认通知 ID。固定 ID 保证同一时刻只有一条岛通知存在。*/
     const val NOTIF_ID = 0x48594944  // "HYID"
@@ -199,7 +199,7 @@ object IslandDispatcher {
     private fun resolveIcon(icon: Icon?, context: Context): Icon {
         if (icon != null) return icon
         return try {
-            InProcessController.getAppIcon(context, "com.example.hyperisland")
+            InProcessController.getAppIcon(context, "io.github.hyperisland")
                 ?.toRounded(context)
                 ?: fallbackIcon(context)
         } catch (_: Exception) {

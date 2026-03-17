@@ -1,13 +1,13 @@
-package com.example.hyperisland.xposed.templates
+package io.github.hyperisland.xposed.templates
 
 import android.app.Notification
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
-import com.example.hyperisland.xposed.IslandTemplate
-import com.example.hyperisland.xposed.NotifData
-import com.example.hyperisland.xposed.toRounded
+import io.github.hyperisland.xposed.IslandTemplate
+import io.github.hyperisland.xposed.NotifData
+import io.github.hyperisland.xposed.toRounded
 import de.robv.android.xposed.XposedBridge
 import io.github.d4viddf.hyperisland_kit.HyperAction
 import io.github.d4viddf.hyperisland_kit.HyperIslandNotification
