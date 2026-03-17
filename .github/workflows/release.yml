@@ -110,6 +110,7 @@ jobs:
       # 使用 release 模式编译（包含代码混淆和资源压缩）
       # 发布版本：使用原始版本号
       # 仅编译版本：versionName 添加 -dev 后缀，versionCode 递增
+      # 仅编译 ARM64 架构
       - name: Build APK
         env:
           KEYSTORE_PATH: release.jks
@@ -118,6 +119,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           flutter build apk --release \
+            --target-platform android-arm64 \
             --build-name="${{ steps.version.outputs.build_version_name }}" \
             --build-number="${{ steps.version.outputs.build_version_code }}"
 
