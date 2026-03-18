@@ -179,6 +179,9 @@ class GenericProgressHook : IXposedHookLoadPackage {
 
             val extras = notif.extras ?: return
 
+            // 跳过已自带超级岛参数的通知，避免重复处理导致 SystemUI 崩溃
+            if (extras.containsKey("miui.focus.param")) return
+
             // ── 进度条检测（需先于 flag 检查，以便状态变化通知绕过缓存标记）────────
             val progressMax    = extras.getInt(Notification.EXTRA_PROGRESS_MAX, 0)
             val indeterminate  = extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE, false)
