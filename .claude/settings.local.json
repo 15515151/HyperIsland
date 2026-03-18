@@ -38,7 +38,9 @@
       "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" && flutter gen-l10n 2>&1)",
       "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" && flutter analyze lib/pages/settings_page.dart lib/main.dart lib/controllers/settings_controller.dart 2>&1 | tail -20)",
       "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" && flutter gen-l10n 2>&1 && flutter analyze lib/pages/home_page.dart lib/pages/settings_page.dart lib/controllers/update_controller.dart lib/controllers/settings_controller.dart 2>&1 | tail -15)",
-      "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" && flutter analyze lib/pages/home_page.dart lib/pages/settings_page.dart lib/controllers/update_controller.dart lib/controllers/settings_controller.dart 2>&1 | tail -5)"
+      "Bash(cd \"C:\\\\Users\\\\1812z\\\\Documents\\\\GitHub\\\\hyperisland\" && flutter analyze lib/pages/home_page.dart lib/pages/settings_page.dart lib/controllers/update_controller.dart lib/controllers/settings_controller.dart 2>&1 | tail -5)",
+      "Bash(cd /tmp/hyperisland_kit && javap -c \"io/github/d4viddf/hyperisland_kit/HyperIslandNotification.class\" 2>&1 | grep -A5 -B5 \"android\\\\.\\\\|putString\\\\|putAll\\\\|EXTRA\\\\|resourceBundle\\\\|buildResource\" | head -100)",
+      "Bash(cd /tmp/hyperisland_kit && javap -p \"io/github/d4viddf/hyperisland_kit/HyperIslandNotification.class\" 2>&1)"
     ]
   }
 }
