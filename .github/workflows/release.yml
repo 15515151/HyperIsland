@@ -93,27 +93,25 @@ jobs:
           distribution: 'temurin'
 
       # 第四步：安装 Flutter SDK
-      # 使用稳定版本的 Flutter
-      # 启用缓存加速下载
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2.16.0
+        uses: subosito/flutter-action@v2.18.0
         with:
-          channel: 'stable'
+          flutter-version: '3.32.6'
           cache: true
-          cache-key: flutter-${{ runner.os }}-stable-${{ hashFiles('**/pubspec.lock') }}
-          cache-path: ${{ runner.tool_cache }}/flutter
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+          pub-cache-key: 'flutter-pub-:os:-:channel:-:version:-:arch:-:hash:'
 
       # 第五步：设置 Gradle
-      # 使用官方 Gradle setup action，自动处理缓存
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.1.0
         with:
           gradle-version: wrapper
+          cache-disabled: false
 
       # 第六步：安装 Flutter 依赖
       # 执行 flutter pub get 下载 pubspec.yaml 中定义的所有依赖包
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --offline || flutter pub get
 
       # 第七步：解码签名密钥
       # 将 base64 编码的密钥文件解码为 .jks 文件
@@ -133,7 +131,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          flutter build apk --release \
+          flutter build apk --release --no-pub \
             --target-platform android-arm64 \
             --build-name="${{ steps.version.outputs.build_version_name }}" \
             --build-number="${{ steps.version.outputs.build_version_code }}" \
