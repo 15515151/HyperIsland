@@ -3,6 +3,7 @@ package io.github.hyperisland.xposed
 import android.app.Notification
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import io.github.hyperisland.getAppIcon
 import io.github.hyperisland.xposed.templates.DownloadIslandNotification
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
@@ -121,7 +122,7 @@ class DownloadHook : IXposedHookLoadPackage {
                         val context = getContext(lpparam) ?: return
                         InProcessController.ensureRegistered(context)
                         val appIcon = if (InProcessController.useHookAppIconEnabled)
-                            InProcessController.getAppIcon(context, lpparam.packageName) else null
+                            context.packageManager.getAppIcon(lpparam.packageName) else null
                         DownloadIslandNotification.inject(context, extras, title, text, progress, appName, fileName, downloadId, lpparam.packageName, appIcon = appIcon)
                         // 不在此处设置 hyperisland_processed，让 Notify hook 继续运行设置 notif.actions
                     }
@@ -187,7 +188,7 @@ class DownloadHook : IXposedHookLoadPackage {
             val context = getContext(lpparam) ?: return
             InProcessController.ensureRegistered(context)
             val appIcon = if (InProcessController.useHookAppIconEnabled)
-                InProcessController.getAppIcon(context, lpparam.packageName) else null
+                context.packageManager.getAppIcon(lpparam.packageName) else null
 
             // 把 pause/cancel 写入标准 notification.actions[]
             // MIUI 超级岛点击按钮时，触发的是 actions[] 里的 PendingIntent

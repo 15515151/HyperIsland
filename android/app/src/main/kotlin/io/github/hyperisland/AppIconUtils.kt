@@ -27,3 +27,4 @@ fun android.content.pm.PackageManager.getAppIcon(packageName: String, size: Int 
         null
     }
 }
+

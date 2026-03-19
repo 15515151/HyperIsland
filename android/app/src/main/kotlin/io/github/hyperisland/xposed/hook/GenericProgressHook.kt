@@ -2,6 +2,7 @@ package io.github.hyperisland.xposed
 
 import android.app.Notification
 import android.service.notification.StatusBarNotification
+import io.github.hyperisland.getAppIcon
 import io.github.hyperisland.xposed.templates.GenericProgressIslandNotification
 import io.github.hyperisland.xposed.templates.NotificationIslandNotification
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -222,7 +223,7 @@ class GenericProgressHook : IXposedHookLoadPackage {
 
             val template = loadChannelTemplate(context, pkg, channelId)
 
-            val appIconRaw = InProcessController.getAppIcon(context, pkg)
+            val appIconRaw = context.packageManager.getAppIcon(pkg)
             val largeIcon  = extractLargeIcon(extras)
 
             val iconMode = loadChannelStringSetting(

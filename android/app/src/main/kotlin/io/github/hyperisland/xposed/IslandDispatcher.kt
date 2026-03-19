@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.os.Build
+import io.github.hyperisland.getAppIcon
 import android.os.Bundle
 import de.robv.android.xposed.XposedBridge
 import io.github.d4viddf.hyperisland_kit.HyperIslandNotification
@@ -199,7 +200,7 @@ object IslandDispatcher {
     private fun resolveIcon(icon: Icon?, context: Context): Icon {
         if (icon != null) return icon
         return try {
-            InProcessController.getAppIcon(context, "io.github.hyperisland")
+            context.packageManager.getAppIcon("io.github.hyperisland")
                 ?.toRounded(context)
                 ?: fallbackIcon(context)
         } catch (_: Exception) {

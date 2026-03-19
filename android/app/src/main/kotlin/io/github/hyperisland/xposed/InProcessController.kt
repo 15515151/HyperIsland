@@ -420,7 +420,7 @@ object InProcessController {
             val extras = extrasField?.get(notif) as? Bundle ?: return
 
             val pausedTitle = if (snapshot.isMultiFile) "${snapshot.fileName} 已暂停" else "已暂停"
-            val appIcon = getAppIcon(context, snapshot.packageName)
+            val appIcon = context.packageManager.getAppIcon(snapshot.packageName)
             DownloadIslandNotification.inject(
                 context, extras, pausedTitle, snapshot.fileName,
                 snapshot.progress, "", snapshot.fileName,
@@ -461,19 +461,6 @@ object InProcessController {
             XposedBridge.log("HyperIsland: cancelPausedOverlay")
         } catch (e: Exception) {
             XposedBridge.log("HyperIsland: cancelPausedOverlay failed: ${e.message}")
-        }
-    }
-
-    /**
-     * 获取指定包名的应用启动图标，转换为 [Icon]。
-     * 失败时返回 null，由调用方降级到默认图标。
-     */
-    fun getAppIcon(context: Context, packageName: String): android.graphics.drawable.Icon? {
-        return try {
-            context.packageManager.getAppIcon(packageName)
-        } catch (e: Exception) {
-            XposedBridge.log("HyperIsland: getAppIcon($packageName) failed: ${e.message}")
-            null
         }
     }
 
