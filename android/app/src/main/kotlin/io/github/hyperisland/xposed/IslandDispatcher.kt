@@ -47,7 +47,11 @@ import io.github.d4viddf.hyperisland_kit.models.TextInfo
 object IslandDispatcher {
 
     /** 广播 Action，由 HyperIsland 应用发出，由 SystemUI 进程内 Receiver 接收。*/
-    const val ACTION   = "io.github.hyperisland.ACTION_SHOW_ISLAND"
+    const val ACTION        = "io.github.hyperisland.ACTION_SHOW_ISLAND"
+    /** 广播 Action，用于跨进程请求取消代理通知。*/
+    const val ACTION_CANCEL = "io.github.hyperisland.ACTION_CANCEL_ISLAND"
+    /** 取消广播携带的通知 ID extra 键。*/
+    const val EXTRA_NOTIF_ID = "notif_id"
 
     /**
      * 广播发送方所需权限（signature 级）。
@@ -64,17 +68,32 @@ object IslandDispatcher {
 
     @Volatile private var registered = false
 
+    /** 记录已发出的代理通知 ID，用于判断首次发送（触发岛动画）还是后续更新。*/
+    private val postedIds = androidx.collection.ArraySet<Int>()
+
     // ── 广播接收器（运行在 SystemUI 进程）────────────────────────────────────
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action != ACTION) return
-            try {
-                val request = IslandRequest.fromIntent(intent)
-                XposedBridge.log("$TAG onReceive: title=${request.title}")
-                post(context.applicationContext ?: context, request)
-            } catch (e: Exception) {
-                XposedBridge.log("$TAG onReceive error: ${e.message}")
+            val appCtx = context.applicationContext ?: context
+            when (intent.action) {
+                ACTION -> {
+                    try {
+                        val request = IslandRequest.fromIntent(intent)
+                        XposedBridge.log("$TAG onReceive: title=${request.title}")
+                        post(appCtx, request)
+                    } catch (e: Exception) {
+                        XposedBridge.log("$TAG onReceive error: ${e.message}")
+                    }
+                }
+                ACTION_CANCEL -> {
+                    try {
+                        val notifId = intent.getIntExtra(EXTRA_NOTIF_ID, NOTIF_ID)
+                        cancel(appCtx, notifId)
+                    } catch (e: Exception) {
+                        XposedBridge.log("$TAG onReceive cancel error: ${e.message}")
+                    }
+                }
             }
         }
     }
@@ -90,7 +109,7 @@ object IslandDispatcher {
         val appCtx = context.applicationContext ?: context
         createChannel(appCtx)
 
-        val filter = IntentFilter(ACTION)
+        val filter = IntentFilter(ACTION).apply { addAction(ACTION_CANCEL) }
         if (Build.VERSION.SDK_INT >= 33) {
             appCtx.registerReceiver(receiver, filter, PERM, null, Context.RECEIVER_EXPORTED)
         } else {
@@ -155,7 +174,10 @@ object IslandDispatcher {
                 .setContentTitle(request.title)
                 .setContentText(request.content)
                 .setAutoCancel(true)
-                .apply { request.contentIntent?.let { setContentIntent(it) } }
+                .apply {
+                    if (request.isOngoing) setOngoing(true)
+                    request.contentIntent?.let { setContentIntent(it) }
+                }
                 .build()
 
             notif.extras.putAll(resourceBundle)
@@ -166,12 +188,19 @@ object IslandDispatcher {
                 .let { injectIslandAppearance(it, request.highlightColor, request.dismissIsland) }
             notif.extras.putString("miui.focus.param", jsonParam)
 
-            // 先取消同 ID 的旧通知，让 HyperOS 视为全新通知并触发岛动画
-            nm.cancel(request.notifId)
-            nm.notify(request.notifId, notif)
+            val isFirstPost = !postedIds.contains(request.notifId)
+            if (isFirstPost) {
+                // 首次：cancel + notify，触发岛动画
+                nm.cancel(request.notifId)
+                nm.notify(request.notifId, notif)
+                postedIds.add(request.notifId)
+            } else {
+                // 后续更新：直接 notify，HyperOS 视为更新而非新通知
+                nm.notify(request.notifId, notif)
+            }
 
             XposedBridge.log(
-                "$TAG posted: ${request.title} | ${request.content}" +
+                "$TAG posted(first=$isFirstPost): ${request.title} | ${request.content}" +
                 " | highlight=${request.highlightColor} | dismiss=${request.dismissIsland}"
             )
         } catch (e: Exception) {
@@ -189,6 +218,22 @@ object IslandDispatcher {
             putExtras(request.toBundle())
         }
         context.sendBroadcast(intent)
+    }
+
+    /**
+     * [进程内直接调用]
+     * 原始通知被取消时调用，同步取消代理通知并清除首次发送状态。
+     * 下次再为同一 [notifId] 调用 [post] 时将重新触发岛动画。
+     */
+    fun cancel(context: Context, notifId: Int) {
+        try {
+            val nm = context.getSystemService(NotificationManager::class.java) ?: return
+            nm.cancel(notifId)
+            postedIds.remove(notifId)
+            XposedBridge.log("$TAG cancel: notifId=$notifId")
+        } catch (e: Exception) {
+            XposedBridge.log("$TAG cancel error: ${e.message}")
+        }
     }
 
     // ── 内部工具 ──────────────────────────────────────────────────────────────

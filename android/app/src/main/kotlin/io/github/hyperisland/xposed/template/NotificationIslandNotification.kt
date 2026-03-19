@@ -143,6 +143,7 @@ object NotificationIslandNotification : IslandTemplate {
                     enableFloat      = resolvedEnableFloat,
                     showNotification = false,
                     contentIntent    = data.contentIntent,
+                    isOngoing        = data.isOngoing,
                 ),
             )
 

@@ -54,6 +54,8 @@ data class IslandRequest(
      * 代发焦点通知时传入，使点击行为与原通知一致。
      */
     val contentIntent: android.app.PendingIntent? = null,
+    /** 是否为持续通知（对应原通知的 FLAG_ONGOING_EVENT），防止用户手动划掉代理通知。*/
+    val isOngoing: Boolean = false,
 ) {
     fun toBundle(): Bundle = Bundle().apply {
         putString(KEY_TITLE,          title)
@@ -67,6 +69,7 @@ data class IslandRequest(
         putString(KEY_HIGHLIGHT,      highlightColor)
         putBoolean(KEY_DISMISS,       dismissIsland)
         putParcelable(KEY_CONTENT_INTENT, contentIntent)
+        putBoolean(KEY_ONGOING, isOngoing)
     }
 
     companion object {
@@ -81,6 +84,7 @@ data class IslandRequest(
         private const val KEY_HIGHLIGHT      = "highlightColor"
         private const val KEY_DISMISS        = "dismissIsland"
         private const val KEY_CONTENT_INTENT = "contentIntent"
+        private const val KEY_ONGOING        = "isOngoing"
 
         fun fromBundle(b: Bundle) = IslandRequest(
             title            = b.getString(KEY_TITLE, ""),
@@ -94,6 +98,7 @@ data class IslandRequest(
             highlightColor   = b.getString(KEY_HIGHLIGHT),
             dismissIsland    = b.getBoolean(KEY_DISMISS, false),
             contentIntent    = pendingIntentFromBundle(b),
+            isOngoing        = b.getBoolean(KEY_ONGOING, false),
         )
 
         private fun iconFromBundle(b: Bundle): Icon? =
