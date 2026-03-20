@@ -104,6 +104,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get restartRootRequired =>
+      'Please check if ROOT permission has been granted to this app';
+
+  @override
   String get note1 =>
       '1. This page is only for testing Dynamic Island support, not actual effects';
 

@@ -104,6 +104,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get restartRootRequired => '请检查是否已给予本应用 ROOT 权限';
+
+  @override
   String get note1 => '1.此页面仅用于测试是否支持超级岛，并不代表实际效果';
 
   @override

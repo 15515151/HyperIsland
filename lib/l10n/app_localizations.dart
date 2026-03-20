@@ -272,6 +272,12 @@ abstract class AppLocalizations {
   /// **'重启失败：{message}'**
   String restartFailed(String message);
 
+  /// No description provided for @restartRootRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'请检查是否已给予本应用 ROOT 权限'**
+  String get restartRootRequired;
+
   /// No description provided for @note1.
   ///
   /// In zh, this message translates to:
