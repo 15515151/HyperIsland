@@ -143,8 +143,12 @@ class _HomePageState extends State<HomePage> {
       await _channel.invokeMethod('restartProcesses', {'commands': commands});
     } on PlatformException catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        final msg = (e.code == 'ROOT_ERROR' || e.code == 'ROOT_REQUIRED')
+            ? l10n.restartRootRequired
+            : l10n.restartFailed(e.message ?? '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.restartFailed(e.message ?? ''))),
+          SnackBar(content: Text(msg)),
         );
       }
     } finally {

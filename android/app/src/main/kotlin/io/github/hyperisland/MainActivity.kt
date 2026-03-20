@@ -94,8 +94,14 @@ class MainActivity : FlutterActivity() {
                             }
                             writer.writeBytes("exit\n")
                             writer.flush()
-                            process.waitFor()
-                            runOnUiThread { result.success(true) }
+                            val exitCode = process.waitFor()
+                            if (exitCode != 0) {
+                                runOnUiThread {
+                                    result.error("ROOT_REQUIRED", "Root permission denied (exit $exitCode)", null)
+                                }
+                            } else {
+                                runOnUiThread { result.success(true) }
+                            }
                         } catch (e: Exception) {
                             runOnUiThread { result.error("ROOT_ERROR", e.message, null) }
                         }

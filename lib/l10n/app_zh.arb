@@ -52,6 +52,7 @@
       "message": { "type": "String" }
     }
   },
+  "restartRootRequired": "请检查是否已给予本应用 ROOT 权限",
   "note1": "1.此页面仅用于测试是否支持超级岛，并不代表实际效果",
   "note2": "2.请在 HyperCeiler 中关闭系统界面和小米服务框架的焦点通知白名单",
   "note3": "3.LSPosed 管理器中激活后，必须重启相关作用域软件",

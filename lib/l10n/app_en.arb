@@ -37,6 +37,7 @@
     }
   },
   "restartFailed": "Restart failed: {message}",
+  "restartRootRequired": "Please check if ROOT permission has been granted to this app",
   "note1": "1. This page is only for testing Dynamic Island support, not actual effects",
   "note2": "2. Disable focus notification whitelist for System UI and MIUI Framework in HyperCeiler",
   "note3": "3. After activating in LSPosed Manager, you must restart the related scope app",
