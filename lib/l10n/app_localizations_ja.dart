@@ -182,6 +182,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageZh => '中文';
 
   @override
+  String get languageJa => '日本語';
+
+  @override
   String get languageEn => 'English';
 
   @override
