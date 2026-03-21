@@ -440,7 +440,12 @@ class _BatchChannelSettingsSheetState
 
           // ── 底部按钮区 ───────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              8,
+              24,
+              16 + MediaQuery.of(context).padding.bottom,
+            ),
             child: Row(
               children: [
                 Expanded(
