@@ -177,5 +177,18 @@
     }
   },
   "blacklistedAppsCount": "Blocked focus notifications for {count} apps",
-  "blacklistedAppsCountWithSystem": "Blocked focus notifications for {count} apps (including system apps)"
+  "blacklistedAppsCountWithSystem": "Blocked focus notifications for {count} apps (including system apps)",
+
+  "islandColorSection": "Color Customization",
+  "islandHighlightColorTitle": "Island Highlight Color",
+  "islandHighlightColorSubtitle": "Highlight color for Dynamic Island border and background. Leave empty to use system default.",
+  "focusNotifBgColorTitle": "Focus Notification Background",
+  "focusNotifBgColorSubtitle": "Background color of the focus notification area in the status bar. Leave empty to use system default.",
+  "islandBgColorTitle": "Island Fill Color",
+  "islandBgColorSubtitle": "Overall background fill color for the Dynamic Island. Leave empty to use system default (black).",
+  "colorPickerTitle": "Choose Color",
+  "colorHexHint": "Hex color, e.g. #E040FB",
+  "colorHexInvalid": "Invalid color format. Use #RRGGBB or #AARRGGBB",
+  "colorResetDefault": "Reset to Default",
+  "colorSystemDefault": "System Default"
 }

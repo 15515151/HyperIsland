@@ -291,5 +291,18 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+
+  "islandColorSection": "颜色定制",
+  "islandHighlightColorTitle": "超级岛高亮颜色",
+  "islandHighlightColorSubtitle": "超级岛边框与背景的高亮颜色，不设置则使用系统默认",
+  "focusNotifBgColorTitle": "焦点通知背景颜色",
+  "focusNotifBgColorSubtitle": "状态栏焦点通知区域的背景颜色，不设置则使用系统默认",
+  "islandBgColorTitle": "超级岛背景填充色",
+  "islandBgColorSubtitle": "超级岛整体背景颜色，不设置则使用系统默认（黑色）",
+  "colorPickerTitle": "选择颜色",
+  "colorHexHint": "十六进制颜色，如 #E040FB",
+  "colorHexInvalid": "颜色格式无效，请使用 #RRGGBB 或 #AARRGGBB",
+  "colorResetDefault": "恢复默认",
+  "colorSystemDefault": "系统默认"
 }

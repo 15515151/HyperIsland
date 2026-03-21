@@ -510,4 +510,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String blacklistedAppsCountWithSystem(int count) {
     return '已拦截 $count 个应用的焦点通知（含系统应用）';
   }
+
+  @override
+  String get islandColorSection => '颜色定制';
+
+  @override
+  String get islandHighlightColorTitle => '超级岛高亮颜色';
+
+  @override
+  String get islandHighlightColorSubtitle => '超级岛边框与背景的高亮颜色，不设置则使用系统默认';
+
+  @override
+  String get focusNotifBgColorTitle => '焦点通知背景颜色';
+
+  @override
+  String get focusNotifBgColorSubtitle => '状态栏焦点通知区域的背景颜色，不设置则使用系统默认';
+
+  @override
+  String get islandBgColorTitle => '超级岛背景填充色';
+
+  @override
+  String get islandBgColorSubtitle => '超级岛整体背景颜色，不设置则使用系统默认（黑色）';
+
+  @override
+  String get colorPickerTitle => '选择颜色';
+
+  @override
+  String get colorHexHint => '十六进制颜色，如 #E040FB';
+
+  @override
+  String get colorHexInvalid => '颜色格式无效，请使用 #RRGGBB 或 #AARRGGBB';
+
+  @override
+  String get colorResetDefault => '恢复默认';
+
+  @override
+  String get colorSystemDefault => '系统默认';
 }

@@ -76,6 +76,165 @@ class _SettingsPageState extends State<SettingsPage> {
     await _ctrl.setWrapLongText(value);
   }
 
+  // ─── 颜色定制 ───────────────────────────────────────────────────────────────
+
+  /// 将合法的十六进制颜色字符串解析为 [Color]，失败返回 null。
+  /// 支持 #RRGGBB 和 #AARRGGBB 两种格式。
+  Color? _parseHexColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    final clean = hex.startsWith('#') ? hex.substring(1) : hex;
+    final value = int.tryParse(clean, radix: 16);
+    if (value == null) return null;
+    // 6 位时补全不透明度
+    return clean.length == 6
+        ? Color(0xFF000000 | value)
+        : Color(value);
+  }
+
+  /// 将 [Color] 格式化为 #AARRGGBB 十六进制字符串。
+  String _colorToHex(Color color) {
+    final a = color.alpha.toRadixString(16).padLeft(2, '0');
+    final r = color.red.toRadixString(16).padLeft(2, '0');
+    final g = color.green.toRadixString(16).padLeft(2, '0');
+    final b = color.blue.toRadixString(16).padLeft(2, '0');
+    return '#$a$r$g$b';
+  }
+
+  /// 弹出颜色输入对话框，返回用户确认的十六进制字符串，取消或清除则返回 null。
+  /// [currentHex] 为当前颜色值（可为 null 表示系统默认）。
+  Future<String?> _showColorPickerDialog(
+    AppLocalizations l10n, {
+    String? currentHex,
+  }) async {
+    final controller = TextEditingController(text: currentHex ?? '');
+    String? errorText;
+    Color previewColor = _parseHexColor(currentHex) ?? Colors.transparent;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          void onTextChanged(String v) {
+            final parsed = _parseHexColor(v);
+            setDialogState(() {
+              errorText = (v.isEmpty || parsed != null)
+                  ? null
+                  : l10n.colorHexInvalid;
+              previewColor = parsed ?? Colors.transparent;
+            });
+          }
+
+          return AlertDialog(
+            title: Text(l10n.colorPickerTitle),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 颜色预览块
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: previewColor,
+                    border: Border.all(
+                        color: Theme.of(ctx).colorScheme.outline, width: 1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // 十六进制输入框
+                TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: l10n.colorHexHint,
+                    hintText: '#AARRGGBB',
+                    errorText: errorText,
+                    border: const OutlineInputBorder(),
+                  ),
+                  onChanged: onTextChanged,
+                ),
+              ],
+            ),
+            actions: [
+              // 恢复默认（清除颜色）
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(''),
+                child: Text(l10n.colorResetDefault),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(null),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: errorText == null && controller.text.isNotEmpty
+                    ? () => Navigator.of(ctx).pop(controller.text)
+                    : null,
+                child: Text(l10n.confirm),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    return result;
+  }
+
+  Future<void> _onIslandHighlightColorTap(AppLocalizations l10n) async {
+    final picked = await _showColorPickerDialog(
+      l10n,
+      currentHex: _ctrl.islandHighlightColor,
+    );
+    if (picked == null) return; // 用户取消
+    await _ctrl.setIslandHighlightColor(picked.isEmpty ? null : picked);
+  }
+
+  Future<void> _onFocusNotifBgColorTap(AppLocalizations l10n) async {
+    final picked = await _showColorPickerDialog(
+      l10n,
+      currentHex: _ctrl.focusNotifBgColor,
+    );
+    if (picked == null) return; // 用户取消
+    await _ctrl.setFocusNotifBgColor(picked.isEmpty ? null : picked);
+  }
+
+  Future<void> _onIslandBgColorTap(AppLocalizations l10n) async {
+    final picked = await _showColorPickerDialog(
+      l10n,
+      currentHex: _ctrl.islandBgColor,
+    );
+    if (picked == null) return;
+    await _ctrl.setIslandBgColor(picked.isEmpty ? null : picked);
+  }
+
+  /// 构建颜色预览小圆片 + 文字的行式副标题。
+  Widget _buildColorSubtitle(
+    BuildContext context,
+    AppLocalizations l10n,
+    String? hexColor,
+    String descWhenSet,
+  ) {
+    final color = _parseHexColor(hexColor);
+    if (color == null) {
+      return Text(l10n.colorSystemDefault);
+    }
+    return Row(
+      children: [
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+                color: Theme.of(context).colorScheme.outline, width: 1),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(hexColor!.toUpperCase()),
+      ],
+    );
+  }
+
   void _showSnack(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -413,6 +572,91 @@ class _SettingsPageState extends State<SettingsPage> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.vertical(
                                   bottom: Radius.circular(16))),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // ─── 颜色定制分区 ────────────────────────────────────────────
+                  SectionLabel(l10n.islandColorSection),
+                  const SizedBox(height: 8),
+                  Card(
+                    elevation: 0,
+                    color: cs.surfaceContainerHighest,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Column(
+                      children: [
+                        // 超级岛边框高亮颜色
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(16))),
+                          title: Text(l10n.islandHighlightColorTitle),
+                          subtitle: _buildColorSubtitle(
+                            context,
+                            l10n,
+                            _ctrl.islandHighlightColor,
+                            _ctrl.islandHighlightColor ?? '',
+                          ),
+                          trailing: _ctrl.islandHighlightColor != null
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  tooltip: l10n.colorResetDefault,
+                                  onPressed: () =>
+                                      _ctrl.setIslandHighlightColor(null),
+                                )
+                              : const Icon(Icons.chevron_right),
+                          onTap: () => _onIslandHighlightColorTap(l10n),
+                        ),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
+                        // 焦点通知背景颜色
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          title: Text(l10n.focusNotifBgColorTitle),
+                          subtitle: _buildColorSubtitle(
+                            context,
+                            l10n,
+                            _ctrl.focusNotifBgColor,
+                            _ctrl.focusNotifBgColor ?? '',
+                          ),
+                          trailing: _ctrl.focusNotifBgColor != null
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  tooltip: l10n.colorResetDefault,
+                                  onPressed: () =>
+                                      _ctrl.setFocusNotifBgColor(null),
+                                )
+                              : const Icon(Icons.chevron_right),
+                          onTap: () => _onFocusNotifBgColorTap(l10n),
+                        ),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
+                        // 超级岛背景填充色
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                  bottom: Radius.circular(16))),
+                          title: Text(l10n.islandBgColorTitle),
+                          subtitle: _buildColorSubtitle(
+                            context,
+                            l10n,
+                            _ctrl.islandBgColor,
+                            _ctrl.islandBgColor ?? '',
+                          ),
+                          trailing: _ctrl.islandBgColor != null
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  tooltip: l10n.colorResetDefault,
+                                  onPressed: () =>
+                                      _ctrl.setIslandBgColor(null),
+                                )
+                              : const Icon(Icons.chevron_right),
+                          onTap: () => _onIslandBgColorTap(l10n),
                         ),
                       ],
                     ),

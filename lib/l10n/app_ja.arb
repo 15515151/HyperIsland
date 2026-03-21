@@ -177,5 +177,18 @@
     }
   },
   "blacklistedAppsCount": "{count} 個のアプリのフォーカス通知をブロックしました",
-  "blacklistedAppsCountWithSystem": "{count} 個のアプリのフォーカス通知をブロックしました (システムアプリを含む)"
+  "blacklistedAppsCountWithSystem": "{count} 個のアプリのフォーカス通知をブロックしました (システムアプリを含む)",
+
+  "islandColorSection": "カラーカスタマイズ",
+  "islandHighlightColorTitle": "アイランドのハイライトカラー",
+  "islandHighlightColorSubtitle": "ダイナミックアイランドの枠と背景のハイライトカラー。未設定の場合はシステムデフォルト。",
+  "focusNotifBgColorTitle": "フォーカス通知の背景色",
+  "focusNotifBgColorSubtitle": "ステータスバーのフォーカス通知エリアの背景色。未設定の場合はシステムデフォルト。",
+  "islandBgColorTitle": "アイランド背景の塗りつぶし色",
+  "islandBgColorSubtitle": "ダイナミックアイランド全体の背景色。未設定の場合はシステムデフォルト（黒）。",
+  "colorPickerTitle": "カラーを選択",
+  "colorHexHint": "16進数カラー（例：#E040FB）",
+  "colorHexInvalid": "カラー形式が無効です。#RRGGBB または #AARRGGBB を使用してください",
+  "colorResetDefault": "デフォルトに戻す",
+  "colorSystemDefault": "システムデフォルト"
 }

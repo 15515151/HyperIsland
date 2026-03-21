@@ -514,4 +514,42 @@ class AppLocalizationsJa extends AppLocalizations {
   String blacklistedAppsCountWithSystem(int count) {
     return '$count 個のアプリのフォーカス通知をブロックしました (システムアプリを含む)';
   }
+
+  @override
+  String get islandColorSection => 'カラーカスタマイズ';
+
+  @override
+  String get islandHighlightColorTitle => 'アイランドのハイライトカラー';
+
+  @override
+  String get islandHighlightColorSubtitle =>
+      'ダイナミックアイランドの枠と背景のハイライトカラー。未設定の場合はシステムデフォルト。';
+
+  @override
+  String get focusNotifBgColorTitle => 'フォーカス通知の背景色';
+
+  @override
+  String get focusNotifBgColorSubtitle =>
+      'ステータスバーのフォーカス通知エリアの背景色。未設定の場合はシステムデフォルト。';
+
+  @override
+  String get islandBgColorTitle => 'アイランド背景の塗りつぶし色';
+
+  @override
+  String get islandBgColorSubtitle => 'ダイナミックアイランド全体の背景色。未設定の場合はシステムデフォルト（黒）。';
+
+  @override
+  String get colorPickerTitle => 'カラーを選択';
+
+  @override
+  String get colorHexHint => '16進数カラー（例：#E040FB）';
+
+  @override
+  String get colorHexInvalid => 'カラー形式が無効です。#RRGGBB または #AARRGGBB を使用してください';
+
+  @override
+  String get colorResetDefault => 'デフォルトに戻す';
+
+  @override
+  String get colorSystemDefault => 'システムデフォルト';
 }

@@ -527,4 +527,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String blacklistedAppsCountWithSystem(int count) {
     return 'Blocked focus notifications for $count apps (including system apps)';
   }
+
+  @override
+  String get islandColorSection => 'Color Customization';
+
+  @override
+  String get islandHighlightColorTitle => 'Island Highlight Color';
+
+  @override
+  String get islandHighlightColorSubtitle =>
+      'Highlight color for Dynamic Island border and background. Leave empty to use system default.';
+
+  @override
+  String get focusNotifBgColorTitle => 'Focus Notification Background';
+
+  @override
+  String get focusNotifBgColorSubtitle =>
+      'Background color of the focus notification area in the status bar. Leave empty to use system default.';
+
+  @override
+  String get islandBgColorTitle => 'Island Fill Color';
+
+  @override
+  String get islandBgColorSubtitle =>
+      'Overall background fill color for the Dynamic Island. Leave empty to use system default (black).';
+
+  @override
+  String get colorPickerTitle => 'Choose Color';
+
+  @override
+  String get colorHexHint => 'Hex color, e.g. #E040FB';
+
+  @override
+  String get colorHexInvalid =>
+      'Invalid color format. Use #RRGGBB or #AARRGGBB';
+
+  @override
+  String get colorResetDefault => 'Reset to Default';
+
+  @override
+  String get colorSystemDefault => 'System Default';
 }

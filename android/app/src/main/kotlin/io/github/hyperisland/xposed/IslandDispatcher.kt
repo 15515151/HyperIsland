@@ -200,9 +200,12 @@ object IslandDispatcher {
             flattenActionsToExtras(resourceBundle, notif.extras)
 
             val wrapLongText = isWrapLongTextEnabled(context)
+            // 优先使用 IslandRequest 中调用方明确指定的颜色；
+            // 若调用方未指定（null），则尝试读取用户在 HyperIsland 应用中设置的全局高亮颜色。
+            val resolvedHighlightColor = request.highlightColor ?: getIslandHighlightColor(context)
             val jsonParam = islandBuilder.buildJsonParam()
                 .let { fixTextButtonJson(it, wrapLongText) }
-                .let { injectIslandAppearance(it, request.highlightColor, request.dismissIsland) }
+                .let { injectIslandAppearance(it, resolvedHighlightColor, request.dismissIsland) }
             notif.extras.putString("miui.focus.param", jsonParam)
 
             val isFirstPost = !postedIds.contains(request.notifId)
@@ -357,6 +360,20 @@ object IslandDispatcher {
         } catch (_: Exception) {
             false
         }
+    }
+
+    /**
+     * 从 SettingsProvider 读取用户设置的超级岛边框高亮颜色。
+     * 存储格式为十六进制字符串（如 "#E040FB" 或 "#AAE040FB"）。
+     * 空字符串或读取失败时返回 null，调用方保持系统默认行为。
+     */
+    private fun getIslandHighlightColor(context: Context): String? {
+        return try {
+            val uri = android.net.Uri.parse("content://io.github.hyperisland.settings/pref_island_highlight_color")
+            val raw = context.contentResolver.query(uri, null, null, null, null)
+                ?.use { if (it.moveToFirst()) it.getString(0) else "" } ?: ""
+            raw.takeIf { it.isNotEmpty() }
+        } catch (_: Exception) { null }
     }
 
     /** 将 buildResourceBundle() 里嵌套的 "miui.focus.actions" 展开到 extras 顶层。*/

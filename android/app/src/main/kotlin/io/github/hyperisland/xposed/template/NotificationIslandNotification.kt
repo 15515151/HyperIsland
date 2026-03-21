@@ -197,8 +197,11 @@ object NotificationIslandNotification : IslandTemplate {
             flattenActionsToExtras(resourceBundle, extras)
             // 修正 textButton 字段名：新库输出 "actionIntent"，HyperOS V3 协议只认 "action"
             val wrapLongText = isWrapLongTextEnabled(context)
+            // 读取用户设置的焦点通知背景颜色（"#AARRGGBB" 格式），未设置时为 null
+            val focusBgColor = getFocusNotifBgColor(context)
             val jsonParam = fixTextButtonJson(builder.buildJsonParam(), wrapLongText)
                 .let { if (!isOngoing) injectUpdatable(it, false) else it }
+                .let { if (focusBgColor != null) injectIconTextInfoColor(it, focusBgColor) else it }
             extras.putString("miui.focus.param", jsonParam)
 
             XposedBridge.log(
@@ -285,6 +288,49 @@ object NotificationIslandNotification : IslandTemplate {
         } catch (_: Exception) {
             false
         }
+    }
+
+    /**
+     * 从 SettingsProvider 读取用户设置的焦点通知背景颜色（"#AARRGGBB" 格式）。
+     * 空字符串或读取失败时返回 null，表示不修改焦点通知颜色，使用系统默认。
+     */
+    private fun getFocusNotifBgColor(context: Context): String? {
+        return try {
+            val uri = android.net.Uri.parse("content://io.github.hyperisland.settings/pref_focus_notif_bg_color")
+            val raw = context.contentResolver.query(uri, null, null, null, null)
+                ?.use { if (it.moveToFirst()) it.getString(0) else "" } ?: ""
+            raw.takeIf { it.isNotEmpty() }
+        } catch (_: Exception) { null }
+    }
+
+    /**
+     * 将焦点通知背景颜色注入到 param_v2.bgInfo.colorBg 字段。
+     *
+     * HyperOS 焦点通知插件（miui.systemui.plugin）中，
+     * ModuleBackgroundViewHolder.bind() 从 Template.bgInfo.colorBg 读取十六进制颜色字符串
+     * 并调用 imageView.setBackgroundColor(Color.parseColor(colorBg)) 设置背景填充色。
+     * 因此正确的注入路径是 param_v2.bgInfo（type=1, colorBg=十六进制字符串）。
+     *
+     * @param jsonParam 原始 miui.focus.param JSON 字符串
+     * @param colorHex  十六进制颜色字符串，支持 #RRGGBB 与 #AARRGGBB
+     */
+    private fun injectIconTextInfoColor(jsonParam: String, colorHex: String): String {
+        return try {
+            val json = org.json.JSONObject(jsonParam)
+            val pv2  = json.optJSONObject("param_v2") ?: return jsonParam
+
+            // 确保颜色带 # 前缀（Color.parseColor 需要）
+            val hex = if (colorHex.startsWith('#')) colorHex else "#$colorHex"
+
+            // 注入 bgInfo：type=1 表示纯色背景，colorBg 为十六进制字符串
+            val bgInfo = pv2.optJSONObject("bgInfo") ?: org.json.JSONObject()
+            bgInfo.put("type", 1)
+            bgInfo.put("colorBg", hex)
+            pv2.put("bgInfo", bgInfo)
+
+            XposedBridge.log("HyperIsland[NotifIsland]: injected bgInfo.colorBg=$hex")
+            json.toString()
+        } catch (_: Exception) { jsonParam }
     }
 
     /** 将 buildResourceBundle() 里嵌套的 "miui.focus.actions" 展开到 extras 顶层 */

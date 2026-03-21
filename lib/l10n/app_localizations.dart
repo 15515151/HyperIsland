@@ -1005,6 +1005,78 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'已拦截 {count} 个应用的焦点通知（含系统应用）'**
   String blacklistedAppsCountWithSystem(int count);
+
+  /// No description provided for @islandColorSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'颜色定制'**
+  String get islandColorSection;
+
+  /// No description provided for @islandHighlightColorTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'超级岛高亮颜色'**
+  String get islandHighlightColorTitle;
+
+  /// No description provided for @islandHighlightColorSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'超级岛边框与背景的高亮颜色，不设置则使用系统默认'**
+  String get islandHighlightColorSubtitle;
+
+  /// No description provided for @focusNotifBgColorTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'焦点通知背景颜色'**
+  String get focusNotifBgColorTitle;
+
+  /// No description provided for @focusNotifBgColorSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'状态栏焦点通知区域的背景颜色，不设置则使用系统默认'**
+  String get focusNotifBgColorSubtitle;
+
+  /// No description provided for @islandBgColorTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'超级岛背景填充色'**
+  String get islandBgColorTitle;
+
+  /// No description provided for @islandBgColorSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'超级岛整体背景颜色，不设置则使用系统默认（黑色）'**
+  String get islandBgColorSubtitle;
+
+  /// No description provided for @colorPickerTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择颜色'**
+  String get colorPickerTitle;
+
+  /// No description provided for @colorHexHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'十六进制颜色，如 #E040FB'**
+  String get colorHexHint;
+
+  /// No description provided for @colorHexInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'颜色格式无效，请使用 #RRGGBB 或 #AARRGGBB'**
+  String get colorHexInvalid;
+
+  /// No description provided for @colorResetDefault.
+  ///
+  /// In zh, this message translates to:
+  /// **'恢复默认'**
+  String get colorResetDefault;
+
+  /// No description provided for @colorSystemDefault.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统默认'**
+  String get colorSystemDefault;
 }
 
 class _AppLocalizationsDelegate

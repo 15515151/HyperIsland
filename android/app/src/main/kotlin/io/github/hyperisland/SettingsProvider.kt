@@ -43,9 +43,12 @@ class SettingsProvider : ContentProvider() {
         val flutterKey = "flutter.$segment"
         val cursor = MatrixCursor(arrayOf("value"))
 
-        // 字符串类型的 key（白名单、黑名单、渠道列表、渠道模板等），直接返回字符串值
+        // 字符串类型的 key（白名单、黑名单、渠道列表、渠道模板、颜色设置等），直接返回字符串值
         if (segment == "pref_generic_whitelist" ||
             segment == "pref_app_blacklist" ||
+            segment == "pref_island_highlight_color" ||
+            segment == "pref_focus_notif_bg_color" ||
+            segment == "pref_island_bg_color" ||
             segment.startsWith("pref_channels_") ||
             segment.startsWith("pref_channel_template_") ||
             segment.startsWith("pref_channel_icon_") ||
