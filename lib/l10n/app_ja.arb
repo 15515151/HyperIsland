@@ -62,6 +62,8 @@
   "useAppIconSubtitle": "ダウンロードマネージャーの通知でアプリアイコンを使用します",
   "roundIconTitle": "アイコンの角を丸める",
   "roundIconSubtitle": "通知アイコンの角を丸めます",
+  "marqueeChannelTitle": "Island のテキストをスクロール",
+  "marqueeSpeedTitle": "スクロールの速度",
   "themeModeTitle": "カラーモード",
   "themeModeSystem": "システムに従う",
   "themeModeLight": "ライト",
