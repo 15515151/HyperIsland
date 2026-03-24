@@ -41,6 +41,21 @@ class FocusNotifStatusBarIconHook : IXposedHookLoadPackage {
             "com.android.systemui.statusbar.phone.fragment.StatusBarVisibilityModel"
 
         @Volatile private var cachedDirectProxyActiveUntilElapsed = 0L
+        @Volatile private var hooked = false
+
+        private val mainHandler by lazy { android.os.Handler(android.os.Looper.getMainLooper()) }
+        private var trueCallCount = 0
+        private var pendingTrueLog: Runnable? = null
+
+        private fun logTrueDebounced() {
+            trueCallCount++
+            pendingTrueLog?.let { mainHandler.removeCallbacks(it) }
+            pendingTrueLog = Runnable {
+                XposedBridge.log("$TAG: updateStatusBarVisibilities | keepIcons=true ×$trueCallCount")
+                trueCallCount = 0
+                pendingTrueLog = null
+            }.also { mainHandler.postDelayed(it, 1000) }
+        }
 
         @JvmStatic
         internal fun markDirectProxyPosted(timeoutSecs: Int) {
@@ -65,6 +80,8 @@ class FocusNotifStatusBarIconHook : IXposedHookLoadPackage {
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
         if (lpparam.packageName != TARGET_PACKAGE) return
+        if (hooked) return
+        hooked = true
         hookActiveNotificationModel(lpparam.classLoader)
         hookUpdateStatusBarVisibilities(lpparam.classLoader)
     }
@@ -115,18 +132,12 @@ class FocusNotifStatusBarIconHook : IXposedHookLoadPackage {
                         val fragment = param.thisObject
                         val keepIcons = isDirectProxyActive()
 
-                        XposedBridge.log(
-                            "$TAG: updateStatusBarVisibilities finished | keepIcons=$keepIcons"
-                        )
-
                         if (!keepIcons) return
 
+                        logTrueDebounced()
                         forceShowNotificationIconsModel(fragment)
                         restoreNotificationIconArea(fragment)
                         refreshNotificationIconArea(fragment)
-                        XposedBridge.log(
-                            "$TAG: re-show notification icon area after updateStatusBarVisibilities"
-                        )
                     }
                 }
             )
