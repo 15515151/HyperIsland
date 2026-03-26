@@ -45,7 +45,7 @@
   "note4": "4. 一般的なアダプティブ表示に対応しています。適切なテンプレートを確認してみてください。",
 
   "behaviorSection": "動作",
-  "defaultConfigSection": "チャンネルのデフォルト設定",
+  "defaultConfigSection": "デフォルトのチャンネル設定",
   "appearanceSection": "外観",
   "configSection": "構成",
   "aboutSection": "アプリについて",
@@ -64,14 +64,14 @@
   "roundIconTitle": "アイコンの角を丸める",
   "roundIconSubtitle": "通知アイコンの角を丸めます",
   "marqueeChannelTitle": "Island のテキストをスクロール",
-  "marqueeSpeedTitle": "スクロールの速度",
-  "marqueeSpeedLabel": "{speed} px/s",
+  "marqueeSpeedTitle": "速度 ",
+  "marqueeSpeedLabel": "{speed} px/秒",
   "@marqueeSpeedLabel": {
     "placeholders": {
       "speed": { "type": "int" }
     }
   },
-  "wrapLongTextTitle": "自動で折り返す",
+  "wrapLongTextTitle": "自動で折り返す (試験的)",
   "wrapLongTextSubtitle": "長いフォーカス通知テキストを二行に分割します",
   "themeModeTitle": "カラーモード",
   "themeModeSystem": "システムに従う",
@@ -146,7 +146,7 @@
   "templateDownloadName": "ダウンロード",
   "templateNotificationIslandName": "Notification Island",
   "templateNotificationIslandLiteName": "Notification Island|Lite",
-  "templateDownloadLiteName": "ダウンロード|Lite",
+  "templateDownloadLiteName": "Lite|をダウンロード",
   "islandSection": "Island",
 
   "template": "テンプレート",
@@ -165,8 +165,8 @@
   "iconModeNotifLarge": "大きな通知アイコン",
   "iconModeAppIcon": "アプリアイコン",
   "optDefault": "デフォルト",
-  "optDefaultOn": "デフォルト（ON）",
-  "optDefaultOff": "デフォルト（OFF）",
+  "optDefaultOn": "デフォルト (ON)",
+  "optDefaultOff": "デフォルト (OFF)",
   "optOn": "ON",
   "optOff": "OFF",
 
@@ -188,20 +188,20 @@
     }
   },
   "blacklistedAppsCount": "{count} 個のアプリのフォーカス通知をブロックしました",
-  "blacklistedAppsCountWithSystem": "{count} 個のアプリのフォーカス通知をブロックしました (システムアプリを含む)",
+  "blacklistedAppsCountWithSystem": "{count} 個のアプリのフォーカス通知をブロックしました (システムアプリを含む)"
 
-  "firstFloatLabelSubtitle": "Islandが初めて通知を受信したときにフォーカス通知として展開するかどうか",
-  "updateFloatLabelSubtitle": "Islandの更新時に通知を展開するかどうか",
-  "marqueeChannelTitleSubtitle": "Islandで長いメッセージをスクロールするかどうか",
-  "focusNotificationLabelSubtitle": "通知をフォーカス通知に置き換える（無効時は元の通知を表示）",
-  "preserveStatusBarSmallIconLabelSubtitle": "フォーカス通知表示時にステータスバーアイコンを強制的に保持するかどうか",
+  "firstFloatLabelSubtitle": "Island が初めて通知を受信時にフォーカス通知として展開します",
+  "updateFloatLabelSubtitle": "Island の更新時にフロート通知を展開します",
+  "marqueeChannelTitleSubtitle": "Island で長いメッセージをスクロールします",
+  "focusNotificationLabelSubtitle": "通知をフォーカス通知に置き換えます (無効で元の通知が表示されます)",
+  "preserveStatusBarSmallIconLabelSubtitle": "フォーカス通知を表示時にステータスバーアイコンを強制的に保持します",
 
-  "aiConfigSection": "AI 強化",
-  "aiConfigTitle": "AI 通知サマリー",
-  "aiConfigSubtitleEnabled": "有効 · タップして AI パラメータを設定",
-  "aiConfigSubtitleDisabled": "無効 · タップして設定",
-  "aiEnabledTitle": "AI サマリーを有効にする",
-  "aiEnabledSubtitle": "AI が Island の左右テキストを生成。タイムアウト・エラー時は自動でフォールバック",
+  "aiConfigSection": "AI エンハンスメント",
+  "aiConfigTitle": "AI 通知の概要",
+  "aiConfigSubtitleEnabled": "有効 · タップで AI パラメータを構成",
+  "aiConfigSubtitleDisabled": "無効 · タップで構成",
+  "aiEnabledTitle": "AI の概要を有効化",
+  "aiEnabledSubtitle": "AI が Island の左右のテキストを生成します。タイムアウトまたはエラーの発生時はフォールバックします。",
   "aiApiSection": "API パラメータ",
   "aiUrlLabel": "API URL",
   "aiUrlHint": "https://api.openai.com/v1/chat/completions",
@@ -209,10 +209,10 @@
   "aiApiKeyHint": "sk-...",
   "aiModelLabel": "モデル",
   "aiModelHint": "gpt-4o-mini",
-  "aiTestButton": "接続テスト",
-  "aiTestUrlEmpty": "API URL を入力してください",
+  "aiTestButton": "テスト接続",
+  "aiTestUrlEmpty": "始めに API URL を入力してください",
   "aiConfigSaveButton": "保存",
-  "aiConfigSaved": "AI 設定を保存しました",
-  "aiConfigTips": "AI は通知のパッケージ名・タイトル・本文を受け取り、左側（ソース）と右側（内容）の短いテキストを返します。OpenAI 互換 API（DeepSeek、Claude など）に対応。3 秒以内に応答がない場合はデフォルトロジックにフォールバックします。",
-  "templateAiNotificationIslandName": "AI 通知Island"
+  "aiConfigSaved": "AI の構成を保存しました",
+  "aiConfigTips": "AI は各通知のアプリパッケージ、タイトル、コンテンツを受信し短い左側 (ソース) と右側 (コンテンツ) のテキストを返します。OpenAI 形式の API (DeepSeek、Claude など) と互換性があります。3 秒以内に応答がない場合は、デフォルトのロジックにフォールバックします。",
+  "templateAiNotificationIslandName": "AI Notification Island"
 }
