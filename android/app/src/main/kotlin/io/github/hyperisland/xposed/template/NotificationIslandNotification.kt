@@ -3,7 +3,6 @@ package io.github.hyperisland.xposed.templates
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Bundle
-import io.github.hyperisland.xposed.ConfigManager
 import io.github.hyperisland.xposed.IslandDispatcher
 import io.github.hyperisland.xposed.log
 import io.github.hyperisland.xposed.logError
@@ -41,7 +40,7 @@ object NotificationIslandNotification : IslandTemplate {
             resolveRenderer(data.renderer).render(context, extras, vm)
             //ConfigManager.module()?.log("$TAG: injected — ${data.title} | left=${vm.leftTitle} | right=${vm.rightTitle} | buttons=${data.actions.size} | isOngoing=${data.isOngoing}")
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: injection error: ${e.message}")
+            logError("$TAG: injection error: ${e.message}")
         }
     }
 
@@ -75,7 +74,7 @@ object NotificationIslandNotification : IslandTemplate {
             )
             //ConfigManager.module()?.log("$TAG: dispatcher island — ${data.title} | iconMode=${data.iconMode} | timeout=${data.islandTimeout}")
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: dispatcher island error: ${e.message}")
+            logError("$TAG: dispatcher island error: ${e.message}")
         }
     }
 

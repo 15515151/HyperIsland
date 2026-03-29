@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Log
-import io.github.hyperisland.xposed.ConfigManager
 import io.github.hyperisland.xposed.IslandTemplate
 import io.github.hyperisland.xposed.IslandViewModel
 import io.github.hyperisland.xposed.NotifData
@@ -38,7 +37,7 @@ object DownloadLiteIslandNotification : IslandTemplate {
             }
             //module.log("$TAG: "HyperIsland[DownloadLite]: injected — ${data.title} ($stateTag) buttons=${data.actions.size}")
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: injection error: ${e.message}")
+            logError("$TAG: injection error: ${e.message}")
         }
     }
 

@@ -55,7 +55,7 @@ object AINotificationIslandNotification : IslandTemplate {
         val leftText  = aiText?.left  ?: data.title
         val rightText = aiText?.right ?: data.subtitle.ifEmpty { data.title }
 
-        ConfigManager.module()?.log(
+        log(
             if (aiText != null) "$TAG: AI text — left=$leftText | right=$rightText"
             else "$TAG: fallback text — left=$leftText | right=$rightText"
         )
@@ -69,7 +69,7 @@ object AINotificationIslandNotification : IslandTemplate {
             resolveRenderer(data.renderer).render(context, extras, vm)
             //ConfigManager.module()?.log("$TAG: injected — title=${data.title} | left=$leftText | right=$rightText | notifId=${data.notifId}")
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: injection error: ${e.message}")
+            logError("$TAG: injection error: ${e.message}")
         }
     }
 
@@ -101,10 +101,10 @@ object AINotificationIslandNotification : IslandTemplate {
             future.get(3, TimeUnit.SECONDS)
         } catch (_: TimeoutException) {
             future.cancel(true)
-            ConfigManager.module()?.logWarn("$TAG: AI request timed out, falling back")
+            logWarn("$TAG: AI request timed out, falling back")
             null
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: AI request error: ${e.message}")
+            logError("$TAG: AI request error: ${e.message}")
             null
         }
     }
@@ -120,13 +120,13 @@ object AINotificationIslandNotification : IslandTemplate {
             readTimeout    = 2500
             doOutput       = true
         }
-        ConfigManager.module()?.log("$TAG: POST ${config.url}")
+        //log("$TAG: POST ${config.url}")
         return try {
             conn.outputStream.use { it.write(requestBody.toByteArray(Charsets.UTF_8)) }
             val code = conn.responseCode
             if (code != HttpURLConnection.HTTP_OK) {
                 val errorBody = try { conn.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() } ?: "" } catch (_: Exception) { "" }
-                ConfigManager.module()?.logError("$TAG: HTTP $code — $errorBody")
+                logError("$TAG: HTTP $code — $errorBody")
                 return null
             }
             parseAiResponse(conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() })
@@ -172,7 +172,7 @@ object AINotificationIslandNotification : IslandTemplate {
             if (left.isEmpty() && right.isEmpty()) null
             else AiIslandText(left.ifEmpty { "通知" }, right.ifEmpty { "新消息" })
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: failed to parse AI response: ${e.message}")
+            logError("$TAG: failed to parse AI response: ${e.message}")
             null
         }
     }
@@ -205,7 +205,7 @@ object AINotificationIslandNotification : IslandTemplate {
                 ),
             )
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: dispatcher error: ${e.message}")
+            logError("$TAG: dispatcher error: ${e.message}")
         }
     }
 

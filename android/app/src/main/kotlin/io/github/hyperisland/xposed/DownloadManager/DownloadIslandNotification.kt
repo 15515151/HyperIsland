@@ -213,10 +213,10 @@ object DownloadIslandNotification {
                 hasValidProgress -> "${safeProgress}%"
                 else             -> "unknown"
             }
-            ConfigManager.module()?.log("$TAG: injected — $fileName ($stateTag)")
+            log("$TAG: injected — $fileName ($stateTag)")
 
         } catch (e: Exception) {
-            ConfigManager.module()?.logError("$TAG: injection error: ${e.message}")
+            logError("$TAG: injection error: ${e.message}")
         }
     }
 

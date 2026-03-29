@@ -35,7 +35,7 @@ object TemplateRegistry {
     ) {
         val template = registry[templateId]
         if (template == null) {
-            ConfigManager.module()?.logWarn("$TAG: unknown template '$templateId', skipped")
+            logWarn("$TAG: unknown template '$templateId', skipped")
             return
         }
         // 通知进入黑名单处理
