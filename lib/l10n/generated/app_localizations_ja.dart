@@ -642,4 +642,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiPromptDefault => '通知から重要情報を抽出し、左右それぞれ6語または12文字以内にしてください';
+
+  @override
+  String get aiTimeoutLabel => 'AI 响应超时';
 }

@@ -672,4 +672,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get aiPromptDefault =>
       'Bildirimden önemli bilgiyi çıkar, sol ve sağ ayrı ayrı en fazla 6 kelime veya 12 karakter olsun';
+
+  @override
+  String get aiTimeoutLabel => 'AI 响应超时';
 }

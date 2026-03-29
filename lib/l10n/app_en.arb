@@ -220,5 +220,6 @@
   "templateAiNotificationIslandName": "AI Notification Island",
   "aiPromptLabel": "Custom Prompt",
   "aiPromptHint": "Leave empty to use default: Extract key info, left and right each no more than 6 words or 12 characters",
-  "aiPromptDefault": "Extract key info from notification, left and right each no more than 6 words or 12 characters"
+  "aiPromptDefault": "Extract key info from notification, left and right each no more than 6 words or 12 characters",
+  "aiTimeoutLabel": "AI Response Timeout"
 }

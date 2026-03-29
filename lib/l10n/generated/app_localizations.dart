@@ -1253,6 +1253,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'根据通知信息，提取关键信息，左右分别不超过6汉字12字符'**
   String get aiPromptDefault;
+
+  /// No description provided for @aiTimeoutLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'AI 响应超时'**
+  String get aiTimeoutLabel;
 }
 
 class _AppLocalizationsDelegate

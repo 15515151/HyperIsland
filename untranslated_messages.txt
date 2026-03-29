@@ -1,1 +1,9 @@
-{}
+{
+  "ja": [
+    "aiTimeoutLabel"
+  ],
+
+  "tr": [
+    "aiTimeoutLabel"
+  ]
+}

@@ -81,6 +81,7 @@ object AINotificationIslandNotification : IslandTemplate {
         val apiKey: String,
         val model: String,
         val prompt: String,
+        val timeout: Int,
     )
 
     private data class AiIslandText(val left: String, val right: String)
@@ -91,6 +92,7 @@ object AINotificationIslandNotification : IslandTemplate {
         apiKey  = ConfigManager.getString("pref_ai_api_key"),
         model   = ConfigManager.getString("pref_ai_model"),
         prompt  = ConfigManager.getString("pref_ai_prompt"),
+        timeout = ConfigManager.getInt("pref_ai_timeout", 3).coerceIn(3, 15),
     )
 
     // ── AI 调用（带超时） ──────────────────────────────────────────────────────
@@ -100,7 +102,7 @@ object AINotificationIslandNotification : IslandTemplate {
             callAiApi(config, data)
         }
         return try {
-            future.get(3, TimeUnit.SECONDS)
+            future.get(config.timeout.toLong(), TimeUnit.SECONDS)
         } catch (_: TimeoutException) {
             future.cancel(true)
             logWarn("$TAG: AI request timed out, falling back")
