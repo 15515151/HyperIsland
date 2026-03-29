@@ -108,6 +108,15 @@ jobs:
           gradle-version: wrapper
           cache-disabled: false
 
+      # 启用构建缓存
+      - name: Cache Android SDK components
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/27.0.12077973
+            /usr/local/lib/android/sdk/cmake/3.22.1
+          key: android-sdk-ndk-27.0.12077973-cmake-3.22.1
+
       # 第六步：安装 Flutter 依赖
       # 执行 flutter pub get 下载 pubspec.yaml 中定义的所有依赖包
       - name: Install dependencies
