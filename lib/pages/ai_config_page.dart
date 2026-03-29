@@ -53,6 +53,7 @@ class _AiConfigPageState extends State<AiConfigPage> {
     await _ctrl.setAiApiKey(_keyCtrl.text.trim());
     await _ctrl.setAiModel(_modelCtrl.text.trim());
     await _ctrl.setAiPrompt(_promptCtrl.text.trim());
+    await _ctrl.setAiTimeout(_ctrl.aiTimeout);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -261,6 +262,40 @@ class _AiConfigPageState extends State<AiConfigPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        // Prompt in user message toggle
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l10n.aiPromptInUserTitle),
+                          subtitle: Text(l10n.aiPromptInUserSubtitle),
+                          value: _ctrl.aiPromptInUser,
+                          onChanged: _ctrl.setAiPromptInUser,
+                        ),
+                        const SizedBox(height: 24),
+                        // Timeout slider
+                        Row(
+                          children: [
+                            Icon(Icons.timer_outlined, size: 20, color: cs.onSurfaceVariant),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(l10n.aiTimeoutLabel, style: Theme.of(context).textTheme.bodyMedium),
+                                  Text('${_ctrl.aiTimeout}s', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Slider(
+                          value: _ctrl.aiTimeout.toDouble(),
+                          min: 3,
+                          max: 15,
+                          divisions: 12,
+                          label: '${_ctrl.aiTimeout}s',
+                          onChanged: (v) => _ctrl.setAiTimeout(v.round()),
+                        ),
+                        const SizedBox(height: 8),
                         // Buttons row
                         Row(
                           children: [

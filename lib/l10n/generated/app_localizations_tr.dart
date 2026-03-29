@@ -672,4 +672,13 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get aiPromptDefault =>
       'Bildirimden önemli bilgiyi çıkar, sol ve sağ ayrı ayrı en fazla 6 kelime veya 12 karakter olsun';
+
+  @override
+  String get aiPromptInUserTitle => '提示词放在用户消息';
+
+  @override
+  String get aiPromptInUserSubtitle => '某些模型不支持系统指令，开启后将提示词放在用户消息中';
+
+  @override
+  String get aiTimeoutLabel => 'AI 响应超时';
 }

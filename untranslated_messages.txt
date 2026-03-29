@@ -1,1 +1,13 @@
-{}
+{
+  "ja": [
+    "aiPromptInUserTitle",
+    "aiPromptInUserSubtitle",
+    "aiTimeoutLabel"
+  ],
+
+  "tr": [
+    "aiPromptInUserTitle",
+    "aiPromptInUserSubtitle",
+    "aiTimeoutLabel"
+  ]
+}
