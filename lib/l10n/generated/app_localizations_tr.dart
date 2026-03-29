@@ -179,13 +179,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get alreadyLatest => 'En son sürümde';
 
   @override
-  String get useAppIconTitle => 'Uygulama Simgesi Kullan';
-
-  @override
-  String get useAppIconSubtitle =>
-      'İndirme yöneticisi bildirimleri uygulama simgesini kullanır';
-
-  @override
   String get roundIconTitle => 'Simge Köşe Yuvarlama';
 
   @override

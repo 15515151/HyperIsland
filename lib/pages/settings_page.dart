@@ -454,20 +454,6 @@ class _SettingsPageState extends State<SettingsPage> {
                             horizontal: 16,
                             vertical: 4,
                           ),
-                          title: Text(l10n.useAppIconTitle),
-                          subtitle: Text(l10n.useAppIconSubtitle),
-                          value: _ctrl.useHookAppIcon,
-                          onChanged: _onUseHookAppIconChanged,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        const Divider(height: 1, indent: 16, endIndent: 16),
-                        SwitchListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
                           title: Text(l10n.roundIconTitle),
                           subtitle: Text(l10n.roundIconSubtitle),
                           value: _ctrl.roundIcon,

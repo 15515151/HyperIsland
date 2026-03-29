@@ -402,18 +402,6 @@ abstract class AppLocalizations {
   /// **'已是最新版本'**
   String get alreadyLatest;
 
-  /// No description provided for @useAppIconTitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'使用应用图标'**
-  String get useAppIconTitle;
-
-  /// No description provided for @useAppIconSubtitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'下载管理器通知使用应用图标'**
-  String get useAppIconSubtitle;
-
   /// No description provided for @roundIconTitle.
   ///
   /// In zh, this message translates to:

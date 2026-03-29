@@ -3,8 +3,6 @@ package io.github.hyperisland.xposed
 import android.app.Notification
 import android.graphics.drawable.Icon
 import android.os.Bundle
-import io.github.hyperisland.getAppIcon
-import io.github.hyperisland.xposed.templates.DownloadIslandNotification
 import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
 import io.github.libxposed.api.XposedModule
 import java.lang.reflect.Field
@@ -47,8 +45,6 @@ object DownloadHook {
         module.log("$TAG: handleLoadPackage pkg=$pkg")
 
         try {
-            hookNotificationBuilder(module, classLoader, pkg)
-
             val nmClass = classLoader.loadClass("android.app.NotificationManager")
             hookNotifyMethod(module, nmClass, classLoader, pkg, hasTag = true)
             hookNotifyMethod(module, nmClass, classLoader, pkg, hasTag = false)
@@ -60,69 +56,6 @@ object DownloadHook {
             hookDownloadManagerService(module, classLoader)
         } catch (e: Throwable) {
             module.logError("$TAG: Error hooking $pkg: ${e.message}")
-        }
-    }
-
-    // ─── Notification.Builder.build() Hook ───────────────────────────────────
-
-    private fun hookNotificationBuilder(module: XposedModule, classLoader: ClassLoader, pkg: String) {
-        val builderClasses = listOf(
-            "android.app.Notification\$Builder",
-            "android.app.Notification.Builder"
-        )
-        for (builderClassName in builderClasses) {
-            try {
-                val builderClass = classLoader.loadClass(builderClassName)
-                val buildMethod = builderClass.getDeclaredMethod("build")
-                module.hook(buildMethod).intercept { chain ->
-                    val result = chain.proceed()
-                    val notif = result as? Notification
-                    if (notif != null) {
-                        val extras = extrasField?.get(notif) as? Bundle
-                        if (extras != null) {
-                            val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
-                            val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
-                            val channelId = notif.channelId ?: ""
-                            module.log("$TAG: [RAW/Builder] ch=$channelId | title=$title | text=$text | extras=${extras.keySet().joinToString()}")
-                            if (isDownloadNotification(title, text, extras) || channelId.isNotEmpty()) {
-                                val appName = pkg.substringAfterLast(".").replaceFirstChar { it.uppercase() }
-                                val fileName = extractFileName(title, text, extras)
-                                val downloadId = extractDownloadId(extras)
-                                val progress = extractProgress(title, text, extras)
-                                val key = "${pkg}_${notif.hashCode()}"
-                                val now = System.currentTimeMillis()
-
-                                var isNew = false
-                                val info = processedNotifications.getOrPut(key) {
-                                    isNew = true
-                                    NotificationInfo(progress, now, appName, downloadId)
-                                }
-                                if (isNew || info.lastProgress != progress) {
-                                    info.lastProgress = progress; info.lastProcessTime = now; info.appName = appName
-                                    if (downloadId > 0) { info.downloadId = downloadId; downloadIdMap[downloadId] = pkg }
-                                    processedNotifications.entries.removeIf { now - it.value.lastProcessTime > 10000 }
-
-                                    if (downloadId <= 0) {
-                                        module.log("$TAG: [Builder] extras keys=${extras.keySet().joinToString()}")
-                                    }
-                                    module.log("$TAG: [Builder] $appName | $fileName | $progress% | id=$downloadId")
-
-                                    val context = getContext(classLoader)
-                                    if (context != null) {
-                                        InProcessController.ensureRegistered(context, module)
-                                        val appIcon = if (InProcessController.useHookAppIconEnabled)
-                                            context.packageManager.getAppIcon(pkg) else null
-                                        DownloadIslandNotification.inject(context, extras, title, text, progress, appName, fileName, downloadId, pkg, appIcon = appIcon, channelId = channelId)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    result
-                }
-                module.log("$TAG: Hooked $builderClassName.build()")
-                break
-            } catch (_: Throwable) {}
         }
     }
 
@@ -156,8 +89,6 @@ object DownloadHook {
     private fun handleNotification(notif: Notification, module: XposedModule, classLoader: ClassLoader, pkg: String, id: Int, tag: String?) {
         try {
             val extras = extrasField?.get(notif) as? Bundle ?: return
-            if (extras.getBoolean("hyperisland_processed", false)) return
-
             val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
             val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
             val channelId = notif.channelId ?: ""
@@ -170,9 +101,52 @@ object DownloadHook {
                 ?: extractIdFromTag(tag).takeIf { it > 0 }
                 ?: id.toLong()
             val progress = extractProgress(title, text, extras)
+            val combined = title + text
+            val isComplete  = progress >= 100
+            val isMultiFile = Regex("""\d+个文件""").containsMatchIn(combined)
+            val isWaiting   = !isComplete &&
+                              (combined.contains("等待") || combined.contains("准备中") ||
+                               combined.contains("queued", ignoreCase = true) || combined.contains("pending", ignoreCase = true))
+            val isPaused    = !isComplete && !isWaiting &&
+                              (combined.contains("暂停") || combined.contains("已暂停") ||
+                               combined.contains("paused", ignoreCase = true))
+
+            val context = getContext(classLoader) ?: return
+            InProcessController.ensureRegistered(context, module)
+
+            // 按钮：每次通知都设置，避免因去重跳过导致闪烁
+            val primaryIntent = when {
+                isPaused && isMultiFile -> InProcessController.resumeAllIntent(context)
+                isPaused               -> InProcessController.resumeIntent(context, downloadId)
+                isMultiFile            -> InProcessController.pauseAllIntent(context)
+                else                   -> InProcessController.pauseIntent(context, downloadId)
+            }
+            val cancelIntent   = if (isMultiFile) InProcessController.cancelAllIntent(context) else InProcessController.cancelIntent(context, downloadId)
+            val primaryLabel   = when {
+                isPaused && isMultiFile -> "全部继续"
+                isPaused               -> "继续"
+                isMultiFile            -> "全部暂停"
+                else                   -> "暂停"
+            }
+            val cancelLabel = if (isMultiFile) "全部取消" else "取消"
+            notif.actions = when {
+                isComplete || isWaiting -> emptyArray()
+                else -> arrayOf(
+                    Notification.Action.Builder(
+                        Icon.createWithResource(context,
+                            if (isPaused) android.R.drawable.ic_media_play else android.R.drawable.ic_media_pause),
+                        primaryLabel, primaryIntent
+                    ).build(),
+                    Notification.Action.Builder(
+                        Icon.createWithResource(context, android.R.drawable.ic_delete),
+                        cancelLabel, cancelIntent
+                    ).build()
+                )
+            }
+
+            // 以下快照更新保留去重，避免频繁写入
             val key = "${pkg}_${tag ?: "null"}_$id"
             val now = System.currentTimeMillis()
-
             var isNew = false
             val info = processedNotifications.getOrPut(key) { isNew = true; NotificationInfo(progress, now, appName, downloadId) }
             if (!isNew && info.lastProgress == progress) return
@@ -180,39 +154,7 @@ object DownloadHook {
             if (downloadId > 0) { info.downloadId = downloadId; downloadIdMap[downloadId] = pkg }
             processedNotifications.entries.removeIf { now - it.value.lastProcessTime > 10000 }
 
-            module.log("$TAG: [Notify] $appName | $fileName | $progress% | notifId=$id | tag=$tag | downloadId=$downloadId")
-
-            val context = getContext(classLoader) ?: return
-            InProcessController.ensureRegistered(context, module)
-            val appIcon = if (InProcessController.useHookAppIconEnabled)
-                context.packageManager.getAppIcon(pkg) else null
-
-            val isComplete = progress >= 100
-            val isMultiFile = Regex("""\d+个文件""").containsMatchIn(title + text)
-            val pauseIntent  = if (isMultiFile) InProcessController.pauseAllIntent(context)  else InProcessController.pauseIntent(context, downloadId)
-            val cancelIntent = if (isMultiFile) InProcessController.cancelAllIntent(context) else InProcessController.cancelIntent(context, downloadId)
-            val pauseLabel   = if (isMultiFile) "全部暂停" else "暂停"
-            val cancelLabel  = if (isMultiFile) "全部取消" else "取消"
-            val isWaiting = !isComplete &&
-                            (title.contains("等待") || text.contains("等待") ||
-                             title.contains("准备中") || text.contains("准备中"))
-            val cancelAction = Notification.Action.Builder(
-                Icon.createWithResource(context, android.R.drawable.ic_delete),
-                cancelLabel, cancelIntent
-            ).build()
-            notif.actions = when {
-                isComplete || isWaiting -> emptyArray()
-                else -> arrayOf(
-                    Notification.Action.Builder(
-                        Icon.createWithResource(context, android.R.drawable.ic_media_pause),
-                        pauseLabel, pauseIntent
-                    ).build(),
-                    cancelAction
-                )
-            }
-
-            DownloadIslandNotification.inject(context, extras, title, text, progress, appName, fileName, downloadId, pkg, appIcon = appIcon, channelId = channelId)
-            extras.putBoolean("hyperisland_processed", true)
+            module.log("$TAG: [Notify] $appName | $fileName | $progress% | paused=$isPaused | notifId=$id | tag=$tag | downloadId=$downloadId")
 
             val snapshotKey = "${tag}_$id"
             if (isComplete) {

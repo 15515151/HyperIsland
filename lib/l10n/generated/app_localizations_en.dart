@@ -178,13 +178,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alreadyLatest => 'Already on the latest version';
 
   @override
-  String get useAppIconTitle => 'Use app icon';
-
-  @override
-  String get useAppIconSubtitle =>
-      'Use app icon for Download Manager notifications';
-
-  @override
   String get roundIconTitle => 'Round icon corners';
 
   @override

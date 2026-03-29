@@ -12,9 +12,6 @@ import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
-import io.github.hyperisland.getAppIcon
-import io.github.hyperisland.xposed.templates.DownloadIslandNotification
 import io.github.libxposed.api.XposedModule
 
 /**
@@ -338,25 +335,13 @@ object InProcessController {
 
     private fun repostAsPaused(context: Context, snapshot: DownloadNotifSnapshot) {
         try {
-            val extrasField = DownloadHook.extrasField
-            val builder = Notification.Builder(context, snapshot.channelId)
+            val notif = Notification.Builder(context, snapshot.channelId)
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setContentTitle(if (snapshot.isMultiFile) "${snapshot.fileName} 已暂停" else "已暂停")
                 .setContentText(snapshot.fileName)
                 .setOngoing(false)
                 .setAutoCancel(false)
-            val notif = builder.build()
-            val extras = extrasField?.get(notif) as? Bundle ?: return
-
-            val pausedTitle = if (snapshot.isMultiFile) "${snapshot.fileName} 已暂停" else "已暂停"
-            val appIcon = context.packageManager.getAppIcon(snapshot.packageName)
-            DownloadIslandNotification.inject(
-                context, extras, pausedTitle, snapshot.fileName,
-                snapshot.progress, "", snapshot.fileName,
-                snapshot.downloadId, snapshot.packageName,
-                isPaused = true, appIcon = appIcon
-            )
-            extras.putBoolean("hyperisland_processed", true)
+                .build()
 
             val resumeIntent = if (snapshot.isMultiFile) resumeAllIntent(context) else resumeIntent(context, snapshot.downloadId)
             val cancelIntent = if (snapshot.isMultiFile) cancelAllIntent(context) else cancelIntent(context, snapshot.downloadId)

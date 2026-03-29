@@ -34,9 +34,8 @@ class AppCacheService extends ChangeNotifier {
   bool get initialized => _initialized;
 
   static const _excludedPackages = {
-    'com.android.providers.downloads',
-    'com.xiaomi.android.app.downloadmanager',
-    'com.android.systemui',
+    "com.android.providers.downloads.ui"
+
   };
 
   Future<void> initialize() async {

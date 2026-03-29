@@ -171,12 +171,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get alreadyLatest => '最新のバージョンを使用しています';
 
   @override
-  String get useAppIconTitle => 'アプリアイコンを使用する';
-
-  @override
-  String get useAppIconSubtitle => 'ダウンロードマネージャーの通知でアプリアイコンを使用します';
-
-  @override
   String get roundIconTitle => 'アイコンの角を丸める';
 
   @override

@@ -168,12 +168,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get alreadyLatest => '已是最新版本';
 
   @override
-  String get useAppIconTitle => '使用应用图标';
-
-  @override
-  String get useAppIconSubtitle => '下载管理器通知使用应用图标';
-
-  @override
   String get roundIconTitle => '图标圆角';
 
   @override
